@@ -87,6 +87,11 @@ namespace CVK
 		*/
 		CVK::Projection *getProjection() const;
 
+		/**
+		* Returns the current camera position
+		*/
+		glm::vec3 getPosition();
+
 	protected:
 		GLFWwindow* m_window = nullptr; //!< the window which provides keyboard/mouse input.
 		int m_width = 0, m_height = 0; //!< deprecated width and height for the projection. TODO remove...

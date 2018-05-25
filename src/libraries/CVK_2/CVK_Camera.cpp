@@ -54,3 +54,8 @@ CVK::Projection *CVK::Camera::getProjection() const
 {
 	return m_projection;
 }
+
+glm::vec3 CVK::Camera::getPosition()
+{
+	return m_cameraPos;
+}

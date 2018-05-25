@@ -38,6 +38,16 @@ CVK::Material::Material( GLuint colorTextureID, float kd, float ks, glm::vec3 sp
 	init( kd, WHITE, ks, specular, shininess);
 	setTexture(COLOR_TEXTURE, colorTextureID);
 }
+
+
+CVK::Material::Material(glm::vec3 diffuse, float metallic, float roughness, float ao)
+{
+	m_diffColor = diffuse;
+	m_metallic = metallic;
+	m_roughness = roughness;
+	m_ao = ao;
+}
+
 void CVK::Material::init( float kd, glm::vec3 diffuse, float ks, glm::vec3 specular, float shininess)
 {
 	m_kd = kd;
@@ -122,6 +132,39 @@ float CVK::Material::getIor() const
 {
 	return m_ior;
 }
+
+
+void CVK::Material::setMetallic(float metallic)
+{
+	m_metallic = metallic;
+}
+
+float CVK::Material::getMetallic() const
+{
+	return m_metallic;
+}
+
+void CVK::Material::setRoughness(float roughness)
+{
+	m_roughness = roughness;
+}
+
+float CVK::Material::getRoughness() const
+{
+	return m_roughness;
+}
+
+void CVK::Material::setAO(float ao)
+{
+	m_ao = ao;
+}
+
+float CVK::Material::getAO() const
+{
+	return m_ao;
+}
+
+
 
 void CVK::Material::setTexture( TextureType type, const std::string fileName)
 {

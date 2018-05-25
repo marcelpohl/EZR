@@ -31,6 +31,7 @@
 #include "CVK_ShaderSet.h"
 #include "CVK_ShaderMinimal.h"
 #include "CVK_ShaderPhong.h"
+#include "CVK_ShaderPBR.h"
 #include "CVK_ShaderPostProcessing.h"
 #include "CVK_ShaderSimpleTexture.h"
 

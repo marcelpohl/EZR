@@ -77,6 +77,18 @@ public:
 	* @param shininess The exponent for the angle for reflective specular illumination
 	*/
 	Material( GLuint colorTextureID, float kd, float ks, glm::vec3 specular, float shininess);
+
+
+	/**
+	* Constructor for Material with given parameters - PBR
+	* @param diffuse The color for direct illumination only dependent on angle between normal and light position
+	* @param metallic The metallic factor of the material
+	* @param roughness The roughness of the material
+	* @param ao The ambient occlusion of the material
+	*/
+	Material(glm::vec3 diffuse, float metallic, float roughness, float ao);
+
+
 	/**
 	 * Standard Destructor for Material
 	 */
@@ -166,6 +178,17 @@ public:
 	 */
 	float getIor() const;
 
+
+	void setMetallic(float metallic);
+	float getMetallic() const;
+
+	void setRoughness(float roughness);
+	float getRoughness() const;
+
+	void setAO(float ao);
+	float getAO() const;
+
+
 	/**
 	 * @brief Setter for texture of given texture type. Image is loaded first.
 	 * @param type the type of the texture
@@ -201,6 +224,13 @@ private:
 
 	CVK::Texture* m_colorTexture = nullptr; //!< color texture for this material
 	CVK::Texture* m_normalTexture = nullptr; //!< normal texture for this material
+
+
+	// material attributes by global values
+	float m_metallic;		//!< is the material metallic or not
+	float m_roughness;		//!< roughness of the material
+	float m_ao;				//!< ambient occlusion of the material
+
 };
 
 }
