@@ -48,6 +48,17 @@ CVK::Material::Material(glm::vec3 diffuse, float metallic, float roughness, floa
 	m_ao = ao;
 }
 
+CVK::Material::Material(const std::string colorTexturePath, const std::string normalTexturePath, const std::string metallicTexturePath, const std::string roughnessTexturePath, const std::string aoTexturePath)
+{
+	setTexture(COLOR_TEXTURE, colorTexturePath);
+	setTexture(NORMAL_TEXTURE, normalTexturePath);
+	setTexture(METALLIC_TEXTURE, metallicTexturePath);
+	setTexture(ROUGHNESS_TEXTURE, roughnessTexturePath);
+	setTexture(AO_TEXTURE, aoTexturePath);
+}
+
+
+
 void CVK::Material::init( float kd, glm::vec3 diffuse, float ks, glm::vec3 specular, float shininess)
 {
 	m_kd = kd;
@@ -182,7 +193,24 @@ void CVK::Material::setTexture( TextureType type, const std::string fileName)
 			else
 				m_normalTexture = new Texture( fileName);
 			break;
-
+		case METALLIC_TEXTURE:
+			if (m_metallicTexture)
+				m_metallicTexture->load(fileName);
+			else
+				m_metallicTexture = new Texture(fileName);
+			break;
+		case ROUGHNESS_TEXTURE:
+			if (m_roughnessTexture)
+				m_roughnessTexture->load(fileName);
+			else
+				m_roughnessTexture = new Texture(fileName);
+			break;
+		case AO_TEXTURE:
+			if (m_aoTexture)
+				m_aoTexture->load(fileName);
+			else
+				m_aoTexture = new Texture(fileName);
+			break;
 	}
 }
 
@@ -202,7 +230,24 @@ void CVK::Material::setTexture( TextureType type, GLuint textureID)
 			else
 				m_normalTexture = new Texture(textureID);
 			break;
-
+		case METALLIC_TEXTURE:
+			if (m_metallicTexture)
+				m_metallicTexture->setTexture(textureID);
+			else
+				m_metallicTexture = new Texture(textureID);
+			break;
+		case ROUGHNESS_TEXTURE:
+			if (m_roughnessTexture)
+				m_roughnessTexture->setTexture(textureID);
+			else
+				m_roughnessTexture = new Texture(textureID);
+			break;
+		case AO_TEXTURE:
+			if (m_aoTexture)
+				m_aoTexture->setTexture(textureID);
+			else
+				m_aoTexture = new Texture(textureID);
+			break;
 	}
 }
 
@@ -214,6 +259,12 @@ bool CVK::Material::hasTexture( TextureType type) const
 			return m_colorTexture != nullptr;
 		case NORMAL_TEXTURE:
 			return m_normalTexture != nullptr;
+		case METALLIC_TEXTURE:
+			return m_metallicTexture != nullptr;
+		case ROUGHNESS_TEXTURE:
+			return m_roughnessTexture != nullptr;
+		case AO_TEXTURE:
+			return m_aoTexture != nullptr;
 		default:
 			return false;
 	}
@@ -227,6 +278,12 @@ CVK::Texture* CVK::Material::getTexture( TextureType type) const
 			return m_colorTexture;
 		case NORMAL_TEXTURE:
 			return m_normalTexture;
+		case METALLIC_TEXTURE:
+			return m_metallicTexture;
+		case ROUGHNESS_TEXTURE:
+			return m_roughnessTexture;
+		case AO_TEXTURE:
+			return m_aoTexture;
 		default:
 			return 0;
 	}

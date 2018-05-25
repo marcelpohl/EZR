@@ -10,11 +10,14 @@ namespace CVK
  * Enum for different texture types. New types might follow.
  * @brief Different texture types
  */
-enum TextureType
-{
-	COLOR_TEXTURE,
-	NORMAL_TEXTURE
-};
+//enum TextureType
+//{
+//	COLOR_TEXTURE,
+//	NORMAL_TEXTURE,
+//	METALLIC_TEXTURE,
+//	ROUGHNESS_TEXTURE,
+//	AO_TEXTURE
+//};
 
 /**
  * Material are used for lighting within a shader. For this the objects of this class store
@@ -79,6 +82,7 @@ public:
 	Material( GLuint colorTextureID, float kd, float ks, glm::vec3 specular, float shininess);
 
 
+
 	/**
 	* Constructor for Material with given parameters - PBR
 	* @param diffuse The color for direct illumination only dependent on angle between normal and light position
@@ -87,6 +91,16 @@ public:
 	* @param ao The ambient occlusion of the material
 	*/
 	Material(glm::vec3 diffuse, float metallic, float roughness, float ao);
+
+	/**
+	* Constructor for Material with given parameters - PBR
+	* @param colorTexturePath The path to the color image for this material
+	* @param normalTexturePath The path to the normal image for this material
+	* @param metallicTexturePath The path to the metallic image for this material
+	* @param roughnessTexturePath The path to the roughness image for this material
+	* @param aoTexturePath The path to the ambient occlusion image for this material
+	*/
+	Material(const std::string colorTexturePath, const std::string normalTexturePath, const std::string metallicTexturePath, const std::string roughnessTexturePath, const std::string aoTexturePath);
 
 
 	/**
@@ -230,6 +244,10 @@ private:
 	float m_metallic;		//!< is the material metallic or not
 	float m_roughness;		//!< roughness of the material
 	float m_ao;				//!< ambient occlusion of the material
+
+	CVK::Texture* m_metallicTexture = nullptr;	//!< metallic texture for this material
+	CVK::Texture* m_roughnessTexture = nullptr; //!< roughness texture for this material
+	CVK::Texture* m_aoTexture = nullptr;		//!< ambient occlusion texture for this material
 
 };
 

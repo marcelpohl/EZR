@@ -26,7 +26,7 @@ public:
 	* @param shader_mask Describes which shader files are used
 	* @param shaderPaths Array of paths to shader files
 	*/
-	ShaderPBR( GLuint shader_mask, const char** shaderPaths);
+	ShaderPBR( GLuint shader_mask, const char** shaderPaths, bool useTextures = false);
 
 	/**
 	* Sets scene dependent variables in Shader. Namely light and fog informations set in State.
@@ -42,11 +42,20 @@ public:
 	*/
 	void update( CVK::Node* node) override;
 
+	void setUseTextures(bool b);
+
 private:
 	GLuint m_camPosID;
 	GLuint m_albedoID, m_metallicID, m_roughnessID, m_aoID;
 	GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
 	GLuint m_numLightsID;
+
+	GLuint m_albedoMapID, m_normalMapID;
+	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
+
+	GLuint m_useTexturesID;
+
+	bool m_useTextures;
 
 };
 

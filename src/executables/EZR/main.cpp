@@ -8,17 +8,22 @@
 GLFWwindow* window = nullptr;
 
 CVK::Node *scene_node = nullptr;
+CVK::Node *scene_node2 = nullptr;
 
 //define Camera (Trackball)
 CVK::Perspective projection(glm::radians(60.0f), WIDTH / (float)HEIGHT, 0.1f, 50.f);
 CVK::Trackball* cam_trackball;
 
 //define materials
-CVK::Material *mat_red_pbr = nullptr;
+CVK::Material *pbr_material = nullptr;
 
+// ImGui
 float metallic = 1.0f;
 float roughness = 0.2f;
 float ao = 0.0f;
+int activeScene = 0;
+bool useTextures = false;
+bool useCamera = false;
 
 glm::vec3 clear_color = glm::vec3(0.45f, 0.55f, 0.60f);
 
@@ -54,35 +59,50 @@ void init_camera()
 void init_lights()
 {
 	//define Light Sources
-	for (int i = -5; i <= 5; i += 10) {
-		for (int j = -5; j <= 5; j += 10) {
-			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 2, 1), glm::vec3(300.0f, 300.0f, 300.0f), glm::vec3(0, 0, 0), 1.0f, 0.0f);
+	for (int i = -10; i <= 10; i += 20) {
+		for (int j = -10; j <= 10; j += 20) {
+			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}
-	CVK::State::getInstance()->updateSceneSettings(DARKGREY, FOG_LINEAR, WHITE, 1, 50, 1);
+	//CVK::Light *plight = new CVK::Light(glm::vec4(0, 0, 10.0f, 1.0f), glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	//CVK::State::getInstance()->addLight(plight);
+	//CVK::State::getInstance()->updateSceneSettings(DARKGREY, FOG_LINEAR, WHITE, 1, 50, 1);
 }
 
 void init_materials()
 {
-	mat_red_pbr = new CVK::Material(RED, metallic, roughness, ao);
+	pbr_material = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
+	pbr_material->setTexture(COLOR_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_basecolor.png");
+	pbr_material->setTexture(NORMAL_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_normal.png");
+	pbr_material->setTexture(METALLIC_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_metallic.png");
+	pbr_material->setTexture(ROUGHNESS_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_roughness.png");
+	pbr_material->setTexture(AO_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2-ao.png");
 }
 
 void init_scene()
 {
 	scene_node = new CVK::Node("Scene");
 
-	CVK::Sphere *sphere = new CVK::Sphere(0.3f);
+	CVK::Sphere *sphere = new CVK::Sphere(0.4f, 32);
 
 	for (int i = -2; i <= 2; i++) {
 		for (int j = -2; j <= 2; j++) {
 			CVK::Node *sphere_node = new CVK::Node(std::string("Sphere ") + std::to_string(i) + std::to_string(j));
-			sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0), glm::vec3(i, j, 0)));
-			sphere_node->setMaterial(mat_red_pbr);
+			sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0), glm::vec3(i, j, 0.0f)));
+			sphere_node->setMaterial(pbr_material);
 			sphere_node->setGeometry(sphere);
 			scene_node->addChild(sphere_node);
 		}
 	}
+
+	scene_node2 = new CVK::Node("Scene");
+	sphere = new CVK::Sphere(1.5f, 64);
+	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"));
+	sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f)));
+	sphere_node->setMaterial(pbr_material);
+	sphere_node->setGeometry(sphere);
+	scene_node2->addChild(sphere_node);
 }
 
 void clean_up()
@@ -111,24 +131,20 @@ void cleanup_imgui()
 
 void draw_gui()
 {
-	// 1. Show a simple window.
-	// Tip: if we don't call ImGui::Begin()/ImGui::End() the widgets automatically appears in a window called "Debug".
 	ImGui::Begin("Debug");
-	ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
-	ImGui::SetWindowSize(ImVec2(300.0f, 200.0f));
+	ImGui::SetWindowSize(ImVec2(400.0f, 190.0f));
 
 	static float f = 0.0f;
 	static int counter = 0;
-	ImGui::Text("Hello, world!");
 	ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
 	ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
 	ImGui::SliderFloat("Ambient Occlusion", &ao, 0.0f, 1.0f);
 	ImGui::ColorEdit3("clear color", (float*)&clear_color);
-
-	if (ImGui::Button("Button"))
-		counter++;
+	
+	ImGui::InputInt("Active Scene", &activeScene);
+	ImGui::Checkbox("Use Textures", &useTextures);
 	ImGui::SameLine();
-	ImGui::Text("counter = %d", counter);
+	ImGui::Checkbox("Use Camera", &useCamera);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -176,15 +192,30 @@ int main()
 		// Update Camera
 		double deltaTime = glfwGetTime() - time;
 		time = glfwGetTime();
-		//cam_trackball->update(deltaTime);
+		if (useCamera) {
+			cam_trackball->update(deltaTime);
+		}
 
 		// Use Shader and define camera uniforms
-		mat_red_pbr->setMetallic(metallic);
-		mat_red_pbr->setRoughness(roughness);
-		mat_red_pbr->setAO(ao);
+		pbr_material->setMetallic(metallic);
+		pbr_material->setRoughness(roughness);
+		pbr_material->setAO(ao);
+
+		pbrShader.setUseTextures(useTextures);
 		pbrShader.update();
 
-		scene_node->render();
+		switch (activeScene)
+		{
+		case 0:
+			scene_node->render();
+			break;
+		case 1:
+			scene_node2->render();
+			break;
+		default:
+			scene_node->render();
+			break;
+		}
 
 		ImGui::Render();
 		ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());
