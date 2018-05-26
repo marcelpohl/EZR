@@ -61,7 +61,7 @@ bool CVK::Texture::load(const std::string fileName)
 	}
 
 	//send image data to the new texture
-	if (bytesPerPixel < 3)
+	if (bytesPerPixel != 1 && bytesPerPixel < 3)
 	{
 		std::cout << "ERROR: Unable to load texture image " << fileName << std::endl;
 		return false;
@@ -71,7 +71,7 @@ bool CVK::Texture::load(const std::string fileName)
 		setTexture( m_width, m_height, bytesPerPixel, data);
 	}
 
-	//stbi_image_free(data);	//keep copy e.g. for CPU ray tracing
+	stbi_image_free(data);	//keep copy e.g. for CPU ray tracing
 	glGenerateMipmap(GL_TEXTURE_2D);          
 
 	std::cout << "SUCCESS: Loaded texture image " << fileName << std::endl;
@@ -98,19 +98,23 @@ void CVK::Texture::setTexture( int width, int height, int bytesPerPixel, unsigne
 	if (m_textureID == INVALID_GL_VALUE) createTexture();
 
 	glBindTexture( GL_TEXTURE_2D, m_textureID);
-	if (m_bytesPerPixel == 3)
+	switch (bytesPerPixel)
 	{
-		glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
-	} 
-	else if (m_bytesPerPixel == 4) 
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
-	} 
-	else 
-	{
+	case 1:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, m_data);
+		break;
+	case 3:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
+		break;
+	case 4:
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+		break;
+	default:
 		std::cout << "RESOLVED: Unknown format for bytes per pixel in texture, changed to 4" << std::endl;
-		glTexImage2D(GL_TEXTURE_2D, 0,GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+		break;
 	}
+
 	glGenerateMipmap(GL_TEXTURE_2D);    
 }
 
