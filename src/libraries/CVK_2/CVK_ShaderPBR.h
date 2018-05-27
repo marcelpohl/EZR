@@ -47,13 +47,13 @@ public:
 private:
 	GLuint m_camPosID;
 	GLuint m_albedoID, m_metallicID, m_roughnessID, m_aoID;
-	GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
-	GLuint m_numLightsID;
+	GLuint m_lightPositionsID[MAX_LIGHTS], m_lightPositionsVertID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
+	GLuint m_numLightsID, m_numLightsVertID;
 
 	GLuint m_albedoMapID, m_normalMapID;
 	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
 
-	GLuint m_useTexturesID;
+	GLuint m_useTexturesID, m_useTexturesVertID;
 
 	bool m_useTextures;
 
