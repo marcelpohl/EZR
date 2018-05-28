@@ -54,8 +54,7 @@ void main()
 		metallic  = 1.0 - texture(metallicMap, TexCoords).b;
 		roughness = 1.0 - texture(roughnessMap, TexCoords).b;
 		ao        = texture(aoMap, TexCoords).b;
-		//N 		  = getNormalFromMap();
-		N 		  = normalize(Normal); 
+		N 		  = getNormalFromMap();
 	} 
 	else 
 	{

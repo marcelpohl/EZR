@@ -3,11 +3,9 @@
 const int MAX_LIGHTS = 8;
 const float PI = 3.14159265359;
 
-in vec3 passWorldPos;
-in vec3 passNormal;
-in vec3 passLightVector[MAX_LIGHTS];
-in vec3 passEyeVector;
-in vec2 passTexCoords;
+in vec3 WorldPos;
+in vec3 Normal;
+in vec2 TexCoords;
 
 out vec4 FragColor;
 
@@ -36,7 +34,7 @@ uniform vec3 lightColors[MAX_LIGHTS];
 
 uniform int numLights;
 
-vec3 getpassNormalFromMap();
+vec3 getNormalFromMap();
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
@@ -49,16 +47,15 @@ void main()
 	float roughness;
 	float ao;
 	vec3 N;
-	vec3 V;
 
 	if (useTextures == 1)
 	{
-	    albedo    = pow(texture(albedoMap, passTexCoords).rgb, vec3(2.2));
-		metallic  = 1.0 - texture(metallicMap, passTexCoords).b;
-		roughness = 1.0 - texture(roughnessMap, passTexCoords).b;
-		ao        = texture(aoMap, passTexCoords).b;
-		N 		  = texture(normalMap, passTexCoords).rgb;
-		V		  = passEyeVector;
+	    albedo    = pow(texture(albedoMap, TexCoords).rgb, vec3(2.2));
+		metallic  = 1.0 - texture(metallicMap, TexCoords).b;
+		roughness = 1.0 - texture(roughnessMap, TexCoords).b;
+		ao        = texture(aoMap, TexCoords).b;
+		//N 		  = getNormalFromMap();
+		N 		  = normalize(Normal); 
 	} 
 	else 
 	{
@@ -66,9 +63,10 @@ void main()
 		metallic  = uMetallic;
 		roughness = uRoughness;
 		ao        = uAo;
-		N = normalize(passNormal); 
-		V = normalize(camPos - passWorldPos);
+		N 		  = normalize(Normal); 
 	}
+
+    vec3 V = normalize(camPos - WorldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)    
@@ -76,18 +74,13 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     // reflectance equation
-	vec3 L;
     vec3 Lo = vec3(0.0);
     for(int i = 0; i < numLights; ++i) 
     {
-		if (useTextures == 1){
-			L = passLightVector[i];
-		} else {
-			L = normalize(lightPositions[i] - passWorldPos);
-		}
         // calculate per-light radiance
+        vec3 L = normalize(lightPositions[i] - WorldPos);
         vec3 H = normalize(V + L);
-        float distance = length(lightPositions[i] - passWorldPos);
+        float distance = length(lightPositions[i] - WorldPos);
         float attenuation = 1.0 / (distance * distance);
         vec3 radiance = lightColors[i] * attenuation;
 
@@ -132,6 +125,24 @@ void main()
     FragColor = vec4(color, 1.0);
 }
 
+
+
+vec3 getNormalFromMap()
+{
+    vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
+
+    vec3 Q1  = dFdx(WorldPos);
+    vec3 Q2  = dFdy(WorldPos);
+    vec2 st1 = dFdx(TexCoords);
+    vec2 st2 = dFdy(TexCoords);
+
+    vec3 N   = normalize(Normal);
+    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
+    vec3 B  = -normalize(cross(N, T));
+    mat3 TBN = mat3(T, B, N);
+
+    return normalize(TBN * tangentNormal);
+}
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {

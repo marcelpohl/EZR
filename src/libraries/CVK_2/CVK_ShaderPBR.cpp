@@ -22,18 +22,14 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths, bool use
 
 	// switcher between global values and textures
 	m_useTexturesID = glGetUniformLocation(m_ProgramID, "useTextures");
-	m_useTexturesVertID = glGetUniformLocation(m_ProgramID, "useTexturesVert");
 
 	// light uniforms
 	std::stringstream uniformString;
-	m_numLightsID = glGetUniformLocation(m_ProgramID, "numLights");
-	m_numLightsVertID = glGetUniformLocation(m_ProgramID, "numLightsVert");
+	m_numLightsID = glGetUniformLocation( m_ProgramID, "numLights");
 	for (auto i = 0; i < MAX_LIGHTS; ++i)
 	{
 		uniformString.str(""); uniformString << "lightPositions[" << i << "]";
 		m_lightPositionsID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
-		uniformString.str(""); uniformString << "lightPositionsVert[" << i << "]";
-		m_lightPositionsVertID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
 		uniformString.str(""); uniformString << "lightColors[" << i << "]";
 		m_lightColorsID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
 	}
@@ -53,22 +49,17 @@ void CVK::ShaderPBR::update()
 	if (m_useTextures)
 	{
 		glUniform1i(m_useTexturesID, 1);
-		glUniform1i(m_useTexturesVertID, 1);
 	}
 	else 
 	{
 		glUniform1i(m_useTexturesID, 0);
-		glUniform1i(m_useTexturesVertID, 0);
 	}
 
-
-	glUniform1i(m_numLightsID, numLights);
-	glUniform1i(m_numLightsVertID, numLights);
+	glUniform1i( m_numLightsID, numLights);
 	for (auto i = 0 ; i < numLights; i++)
 	{
 		CVK::Light *light = &CVK::State::getInstance()->getLights()->at(i);
 		glUniform3fv(m_lightPositionsID[i], 1, glm::value_ptr(*light->getPosition()));
-		glUniform3fv(m_lightPositionsVertID[i], 1, glm::value_ptr(*light->getPosition()));
 		glUniform3fv(m_lightColorsID[i], 1, glm::value_ptr(*light->getColor()));
 	}
 }
