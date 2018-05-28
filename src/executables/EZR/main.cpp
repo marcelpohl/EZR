@@ -16,6 +16,7 @@ CVK::Trackball* cam_trackball;
 
 //define materials
 CVK::Material *pbr_material = nullptr;
+CVK::Material *pbr_mat2 = nullptr;
 
 // ImGui
 float metallic = 1.0f;
@@ -73,11 +74,11 @@ void init_lights()
 void init_materials()
 {
 	pbr_material = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
-	pbr_material->setTexture(COLOR_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_basecolor.png");
-	pbr_material->setTexture(NORMAL_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_normal.png");
-	pbr_material->setTexture(METALLIC_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_metallic.png");
-	pbr_material->setTexture(ROUGHNESS_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2_roughness.png");
-	pbr_material->setTexture(AO_TEXTURE, RESOURCES_PATH "/rustediron1-alt2/rustediron2-ao.png");
+	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/rustediron1-alt2/rustediron2_basecolor.png",
+								 RESOURCES_PATH "/rustediron1-alt2/rustediron2_normal.png",
+								 RESOURCES_PATH "/rustediron1-alt2/rustediron2_metallic.png",
+								 RESOURCES_PATH "/rustediron1-alt2/rustediron2_roughness.png",
+								 RESOURCES_PATH "/rustediron1-alt2/rustediron2-ao.png");
 }
 
 void init_scene()
@@ -169,8 +170,8 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	// Load, compile and link Shader
-	const char *shadernames[2] = { SHADERS_PATH "/PBR/PBR.vert", SHADERS_PATH "/PBR/PBR.frag" };
-	CVK::ShaderPBR pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
+	const char *shadernames[2] = { SHADERS_PATH "/PBR/PBRsimple.vert", SHADERS_PATH "/PBR/PBRsimple.frag" };
+	CVK::ShaderPBRsimple pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
 	CVK::State::getInstance()->setShader(&pbrShader);
 
 	init_camera();
@@ -201,7 +202,6 @@ int main()
 		pbr_material->setRoughness(roughness);
 		pbr_material->setAO(ao);
 
-		pbrShader.setUseTextures(useTextures);
 		pbrShader.update();
 
 		switch (activeScene)

@@ -18,23 +18,12 @@ uniform float uMetallic;
 uniform float uRoughness;
 uniform float uAo;
 
-// material parameters as texture
-uniform sampler2D albedoMap;
-uniform sampler2D normalMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
-uniform sampler2D aoMap;
-
-// switch between global and texture
-uniform int useTextures;
-
 // lights and light properties
 uniform vec3 lightPositions[MAX_LIGHTS];
 uniform vec3 lightColors[MAX_LIGHTS];
 
 uniform int numLights;
 
-vec3 getNormalFromMap();
 float DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
@@ -42,29 +31,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0);
 
 void main()
 {
-	vec3 albedo;
-	float metallic;
-	float roughness;
-	float ao;
-	vec3 N;
-
-	if (useTextures == 1)
-	{
-	    albedo    = pow(texture(albedoMap, TexCoords).rgb, vec3(2.2));
-		metallic  = 1.0 - texture(metallicMap, TexCoords).b;
-		roughness = 1.0 - texture(roughnessMap, TexCoords).b;
-		ao        = texture(aoMap, TexCoords).b;
-		N 		  = getNormalFromMap();
-	} 
-	else 
-	{
-	    albedo    = uAlbedo;
-		metallic  = uMetallic;
-		roughness = uRoughness;
-		ao        = uAo;
-		N 		  = normalize(Normal); 
-	}
-
+    vec3 albedo     = uAlbedo;
+	float metallic  = uMetallic;
+	float roughness = uRoughness;
+	float ao        = uAo;
+	vec3 N 		    = normalize(Normal); 
     vec3 V = normalize(camPos - WorldPos);
 
     // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
@@ -124,24 +95,6 @@ void main()
     FragColor = vec4(color, 1.0);
 }
 
-
-
-vec3 getNormalFromMap()
-{
-    vec3 tangentNormal = texture(normalMap, TexCoords).xyz * 2.0 - 1.0;
-
-    vec3 Q1  = dFdx(WorldPos);
-    vec3 Q2  = dFdy(WorldPos);
-    vec2 st1 = dFdx(TexCoords);
-    vec2 st2 = dFdy(TexCoords);
-
-    vec3 N   = normalize(Normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
 
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
