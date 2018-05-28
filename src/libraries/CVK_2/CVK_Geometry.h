@@ -71,6 +71,11 @@ public:
 	 * @return the tangents of this object as pointer
 	 */
 	std::vector<glm::vec3>* getTangents();
+	/**
+	* @brief Standard Getter for bi tangents
+	* @return the bi tangents of this object as pointer
+	*/
+	std::vector<glm::vec3>* getBiTangents();
 
 protected:
 	int m_geotype; //!< Information for the geometry type (f.e. sphere) 
@@ -80,6 +85,7 @@ protected:
 	GLuint m_uvbuffer; //!< A Vertex Buffer Object for storing vertex uv coordinates 
 	GLuint m_indexlist; //!< A Vertex Buffer Object for storing vertex indices 
 	GLuint m_tangentbuffer; //!< A Vertex Buffer Object for storing vertex tangents 
+	GLuint m_bitangentbuffer; //!< A Vertex Buffer Object for storing vertex bi tangents 
 
 	int m_points; //!< Number of all vertices 
 	int m_indices; //!< Number of all indices 
@@ -89,6 +95,7 @@ protected:
 	std::vector<glm::vec2> m_uvs; //!< A list of all vertex uv coordinates
 	std::vector<unsigned int> m_index; //!< A list of all vertex indices 
 	std::vector<glm::vec3> m_tangents; //!< A list of all vertex tangents 
+	std::vector<glm::vec3> m_bitangents; //!< A list of all vertex bi tangents 
 
 };
 

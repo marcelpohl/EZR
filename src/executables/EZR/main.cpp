@@ -9,6 +9,7 @@ GLFWwindow* window = nullptr;
 
 CVK::Node *scene_node = nullptr;
 CVK::Node *scene_node2 = nullptr;
+CVK::Node *scene_node3 = nullptr;
 
 //define Camera (Trackball)
 CVK::Perspective projection(glm::radians(60.0f), WIDTH / (float)HEIGHT, 0.1f, 50.f);
@@ -74,11 +75,11 @@ void init_lights()
 void init_materials()
 {
 	pbr_material = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
-	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/rustediron1-alt2/rustediron2_basecolor.png",
-								 RESOURCES_PATH "/rustediron1-alt2/rustediron2_normal.png",
-								 RESOURCES_PATH "/rustediron1-alt2/rustediron2_metallic.png",
-								 RESOURCES_PATH "/rustediron1-alt2/rustediron2_roughness.png",
-								 RESOURCES_PATH "/rustediron1-alt2/rustediron2-ao.png");
+	//pbr_mat2 = new CVK::Material(RESOURCES_PATH "/rustediron1-alt2/rustediron2_basecolor.png",
+	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2_normal.png",
+	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2_metallic.png",
+	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2_roughness.png",
+	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2-ao.png");
 }
 
 void init_scene()
@@ -100,10 +101,16 @@ void init_scene()
 	scene_node2 = new CVK::Node("Scene");
 	sphere = new CVK::Sphere(1.5f, 64);
 	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"));
-	sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, 0.0f)));
+	sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
 	sphere_node->setMaterial(pbr_material);
 	sphere_node->setGeometry(sphere);
 	scene_node2->addChild(sphere_node);
+
+	scene_node3 = new CVK::Node("Scene");
+	CVK::Node *shaderPresenter = new CVK::Node(std::string("Presenter"), std::string(RESOURCES_PATH "/meshes/export3dcoat.obj"), false);
+	shaderPresenter->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
+	shaderPresenter->setMaterial(pbr_material);
+	scene_node3->addChild(shaderPresenter);
 }
 
 void clean_up()
@@ -211,6 +218,9 @@ int main()
 			break;
 		case 1:
 			scene_node2->render();
+			break;
+		case 2:
+			scene_node3->render();
 			break;
 		default:
 			scene_node->render();

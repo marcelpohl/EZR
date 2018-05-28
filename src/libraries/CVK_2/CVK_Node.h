@@ -68,8 +68,9 @@ public:
 	 * Constructor for Node with given parameters
 	 * @param name The name for this node
 	 * @param path The path to a model, which is loaded with assimp
+	 * @param loadMaterial Flag if material should be loaded from file
 	 */
-	Node(const std::string name, const std::string path);
+	Node(const std::string name, const std::string path, bool loadMaterial = true);
 	/**
 	 * Standard Destructor for Node
 	 */
@@ -83,8 +84,9 @@ public:
 	 * Loads the model given by the path with assimp. Creates a Geometry with all necessary VBOs and VAO.
 	 * @brief Loads the model with assimp
 	 * @param path The path to the model file
+	 * @param loadMaterial Flag if material should be loaded from file
 	 */
-	void load(std::string path);
+	void load(std::string path, bool loadMaterial);
 	
 	/**
 	 * Main render call for a Node and all subnodes. Calls render with model matrix.

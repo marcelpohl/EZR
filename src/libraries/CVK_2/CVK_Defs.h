@@ -18,6 +18,7 @@
 #define NORMALS       1
 #define TEXTURECOORDS 2
 #define TANGENTS      3
+#define BITANGENTS    4
 
 #define COLOR_TEXTURE_UNIT		GL_TEXTURE0
 #define NORMAL_TEXTURE_UNIT		GL_TEXTURE1

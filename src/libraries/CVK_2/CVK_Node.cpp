@@ -14,11 +14,11 @@ CVK::Node::Node(const std::string name)
 	m_name = name;
 }
 
-CVK::Node::Node(std::string name, std::string path)
+CVK::Node::Node(std::string name, std::string path, bool loadMaterial)
 {
 	init();
 	m_name = name;
-	load(path);
+	load(path, loadMaterial);
 }
 
 CVK::Node::~Node()
@@ -31,17 +31,17 @@ void CVK::Node::init()
 	m_modelMatrix = glm::mat4(1.0f);
 }
 
-void CVK::Node::load(std::string path)
+void CVK::Node::load(std::string path, bool loadMaterial)
 {
 	// load a scene with ASSIMP
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_GenSmoothNormals | aiProcess_Triangulate);
-	if(scene)
+	const aiScene* scene = importer.ReadFile(path, aiProcess_GenSmoothNormals | aiProcess_Triangulate | aiProcess_CalcTangentSpace);
+	if (scene)
 	{
 		std::cout << "SUCCESS: Loaded Model from Path: \""
 			<< path << "\"" << std::endl;
 	}
-	else 
+	else
 	{
 		std::cout << "ERROR: Loading failed from Path: \""
 			<< path << "\"" << std::endl;
@@ -49,78 +49,92 @@ void CVK::Node::load(std::string path)
 	}
 
 	std::vector<CVK::Material*> materials;
-	
+
 	// load all materials in this file
-	for(unsigned int i=0; i < scene->mNumMaterials; i++)
+	if (loadMaterial)
 	{
-		aiMaterial* mat = scene->mMaterials[i];
+		for (unsigned int i = 0; i < scene->mNumMaterials; i++)
+		{
+			aiMaterial* mat = scene->mMaterials[i];
 
-		aiColor3D diffColor (0.f,0.f,0.f);
-		mat->Get(AI_MATKEY_COLOR_DIFFUSE, diffColor);
-		aiColor3D specColor (0.f,0.f,0.f);
-		mat->Get(AI_MATKEY_COLOR_SPECULAR, specColor);
-		float shininess = 0.0f;
-		mat->Get(AI_MATKEY_SHININESS, shininess);
-		glm::vec3 diffuseColor(diffColor.r, diffColor.g, diffColor.b);
-		glm::vec3 specularColor(specColor.r, specColor.g, specColor.b);
+			aiColor3D diffColor(0.f, 0.f, 0.f);
+			mat->Get(AI_MATKEY_COLOR_DIFFUSE, diffColor);
+			aiColor3D specColor(0.f, 0.f, 0.f);
+			mat->Get(AI_MATKEY_COLOR_SPECULAR, specColor);
+			float shininess = 0.0f;
+			mat->Get(AI_MATKEY_SHININESS, shininess);
+			glm::vec3 diffuseColor(diffColor.r, diffColor.g, diffColor.b);
+			glm::vec3 specularColor(specColor.r, specColor.g, specColor.b);
 
-		aiString fileName;  // filename
-		mat->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), fileName);
-		std::string s = path.substr(0, path.rfind("/")) + "/" + fileName.data;
-		
-		//materials.push_back(new CVK::Material(glm::vec3(0.0,1.0,0.0), glm::vec3(0.0,0.0,1.0), 10));
-		if (fileName.length>0) 
-			materials.push_back(new CVK::Material(s, 1.f, 1.f, specularColor, shininess));
+			aiString fileName;  // filename
+			mat->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), fileName);
+			std::string s = path.substr(0, path.rfind("/")) + "/" + fileName.data;
+
+			//materials.push_back(new CVK::Material(glm::vec3(0.0,1.0,0.0), glm::vec3(0.0,0.0,1.0), 10));
+			if (fileName.length > 0)
+				materials.push_back(new CVK::Material(s, 1.f, 1.f, specularColor, shininess));
 			//should set kd and ks!!
-		else 
-			materials.push_back(new CVK::Material(diffuseColor, specularColor, shininess));
+			else
+				materials.push_back(new CVK::Material(diffuseColor, specularColor, shininess));
+		}
 	}
-	
+
 	// load all meshes in this file
-	for(unsigned int i=0; i < scene->mNumMeshes; i++)
+	for (unsigned int i = 0; i < scene->mNumMeshes; i++)
 	{
 		aiMesh* mesh = scene->mMeshes[i];
 
 		CVK::Geometry* geometry = new CVK::Geometry();
-		
+
 		// load geometry information of the current mesh
-		for(unsigned int vCount = 0; vCount < mesh->mNumVertices; vCount++)
+		for (unsigned int vCount = 0; vCount < mesh->mNumVertices; vCount++)
 		{
 			// vertices
 			aiVector3D v = mesh->mVertices[vCount];
-			geometry->getVertices()->push_back( glm::vec4(v.x, v.y, v.z, 1.0f));
+			geometry->getVertices()->push_back(glm::vec4(v.x, v.y, v.z, 1.0f));
 
 			// normals
 			if (mesh->HasNormals())
 			{
 				v = mesh->mNormals[vCount];
-				geometry->getNormals()->push_back( glm::vec3(v.x, v.y, v.z));
+				geometry->getNormals()->push_back(glm::vec3(v.x, v.y, v.z));
 			}
 
 			// texture coordinates
 			if (mesh->HasTextureCoords(0))
 			{
 				v = mesh->mTextureCoords[0][vCount];
-				geometry->getUVs()->push_back( glm::vec2(v.x, v.y));
+				geometry->getUVs()->push_back(glm::vec2(v.x, v.y));
+			}
+
+			if (mesh->HasTangentsAndBitangents())
+			{
+				v = mesh->mTangents[vCount];
+				geometry->getTangents()->push_back(glm::vec3(v.x, v.y, v.z));
+				v = mesh->mBitangents[vCount];
+				geometry->getBiTangents()->push_back(glm::vec3(v.x, v.y, v.z));
 			}
 		}
 
-		for(unsigned int fCount = 0; fCount < mesh->mNumFaces; fCount++)
+		for (unsigned int fCount = 0; fCount < mesh->mNumFaces; fCount++)
 		{
 			aiFace f = mesh->mFaces[fCount];
 			// index numbers
-			for(unsigned int iCount = 0; iCount < f.mNumIndices; iCount++)
+			for (unsigned int iCount = 0; iCount < f.mNumIndices; iCount++)
 			{
 				geometry->getIndex()->push_back(f.mIndices[iCount]);
 			}
 		}
 
 		geometry->createBuffers();
-		
+
 		// new child node with the geometry and a connection to material
 		CVK::Node* child = new CVK::Node();
 		child->setGeometry(geometry);
-		child->setMaterial(materials[mesh->mMaterialIndex]);
+		if(loadMaterial)
+		{
+			child->setMaterial(materials[mesh->mMaterialIndex]);
+		}
 		addChild(child);
 	}
 }
@@ -129,29 +143,29 @@ void CVK::Node::render()
 {
 	glm::mat4 modelMatrix = glm::mat4(1.0f);
 	CVK::Node* parentNode = m_parent;
-	while(parentNode != nullptr)
+	while (parentNode != nullptr)
 	{
 		modelMatrix = *parentNode->getModelMatrix() * modelMatrix;
 		parentNode = parentNode->getParent();
 	}
-	render( modelMatrix);
+	render(modelMatrix);
 }
 
-void CVK::Node::render( glm::mat4 modelMatrix)
+void CVK::Node::render(glm::mat4 modelMatrix)
 {
 	// accumulate model matrix
 	modelMatrix = modelMatrix * *getModelMatrix();
-	
+
 	// update shader
 	CVK::State::getInstance()->getShader()->update(this);
 	CVK::State::getInstance()->getShader()->updateModelMatrix(modelMatrix);
-	
+
 	// render geometry
-	if ( hasGeometry())
+	if (hasGeometry())
 		m_geometry->render();
-	
+
 	// render childs
-	for (unsigned int i = 0; i<m_children.size(); i++)
+	for (unsigned int i = 0; i < m_children.size(); i++)
 	{
 		m_children[i]->render(modelMatrix);
 	}
@@ -159,11 +173,11 @@ void CVK::Node::render( glm::mat4 modelMatrix)
 
 CVK::Node* CVK::Node::find(std::string name)
 {
-	if(m_name == name) return this;
-	for (unsigned int i = 0; i<m_children.size(); i++)
+	if (m_name == name) return this;
+	for (unsigned int i = 0; i < m_children.size(); i++)
 	{
 		CVK::Node* result = m_children[i]->find(name);
-		if(result != nullptr) return result;
+		if (result != nullptr) return result;
 	}
 	return 0;
 }
@@ -218,7 +232,7 @@ glm::mat4* CVK::Node::getModelMatrix()
 	return &m_modelMatrix;
 }
 
-void CVK::Node::setParent( CVK::Node* node)
+void CVK::Node::setParent(CVK::Node* node)
 {
 	m_parent = node;
 }

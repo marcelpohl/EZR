@@ -50,7 +50,6 @@ void CVK::ShaderPBRsimple::update( CVK::Node* node)
 	if( node->hasMaterial())
 	{
 		CVK::Material* mat = node->getMaterial();
-		CVK::Texture *texture;
 
 		glUniform3fv(m_albedoID, 1, glm::value_ptr(*mat->getdiffColor()));
 		glUniform1f(m_metallicID, mat->getMetallic());

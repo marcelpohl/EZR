@@ -1,7 +1,7 @@
 #version 330 core
 
 const int MAX_LIGHTS = 8;
-const float PI = 3.14159265359;
+const float PI = 3.1415926535897932384626433832795;
 
 in vec3 WorldPos;
 in vec3 Normal;
