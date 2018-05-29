@@ -80,7 +80,8 @@ bool CVK::Texture::load(const std::string fileName)
 
 void CVK::Texture::bind() const
 {
-	if (m_textureID != INVALID_GL_VALUE)  glBindTexture( GL_TEXTURE_2D, m_textureID);
+	if (m_textureID != INVALID_GL_VALUE)  
+		glBindTexture( GL_TEXTURE_2D, m_textureID);
 }
 
 void CVK::Texture::setTexture( GLuint texture)

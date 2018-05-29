@@ -44,11 +44,11 @@ public:
 
 private:
 	GLuint m_camPosID;
-	GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
-	GLuint m_numLightsID;
+	//GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
+	//GLuint m_numLightsID;
 
-	GLuint m_albedoMapID, m_normalMapID;
-	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
+	GLuint m_diffuseMapID, m_normalMapID;
+	//GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
 };
 
 }

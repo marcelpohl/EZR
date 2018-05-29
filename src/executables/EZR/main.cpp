@@ -75,11 +75,12 @@ void init_lights()
 void init_materials()
 {
 	pbr_material = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
-	//pbr_mat2 = new CVK::Material(RESOURCES_PATH "/rustediron1-alt2/rustediron2_basecolor.png",
-	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2_normal.png",
-	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2_metallic.png",
-	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2_roughness.png",
-	//							 RESOURCES_PATH "/rustediron1-alt2/rustediron2-ao.png");
+	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/textures/export3dcoat_lambert3SG_color.png",
+								 //RESOURCES_PATH "/textures/export3dcoat_lambert3SG_nmap.png",
+								 RESOURCES_PATH "/textures/normalTest.png",
+								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_metalness.png",
+								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_gloss.png",
+								 RESOURCES_PATH "/textures/materialball_ao.png");
 }
 
 void init_scene()
@@ -109,7 +110,7 @@ void init_scene()
 	scene_node3 = new CVK::Node("Scene");
 	CVK::Node *shaderPresenter = new CVK::Node(std::string("Presenter"), std::string(RESOURCES_PATH "/meshes/export3dcoat.obj"), false);
 	shaderPresenter->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
-	shaderPresenter->setMaterial(pbr_material);
+	shaderPresenter->setMaterial(pbr_mat2);
 	scene_node3->addChild(shaderPresenter);
 }
 
@@ -179,6 +180,9 @@ int main()
 	// Load, compile and link Shader
 	const char *shadernames[2] = { SHADERS_PATH "/PBR/PBRsimple.vert", SHADERS_PATH "/PBR/PBRsimple.frag" };
 	CVK::ShaderPBRsimple pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
+	const char *shadernames2[2] = { SHADERS_PATH "/PBR/PBR.vert", SHADERS_PATH "/PBR/PBR.frag" };
+	CVK::ShaderPBR pbrShaderMain(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames2);
+
 	CVK::State::getInstance()->setShader(&pbrShader);
 
 	init_camera();
@@ -209,7 +213,15 @@ int main()
 		pbr_material->setRoughness(roughness);
 		pbr_material->setAO(ao);
 
-		pbrShader.update();
+		
+		if (useTextures) {
+			CVK::State::getInstance()->setShader(&pbrShaderMain);
+			pbrShaderMain.update();
+		}
+		else {
+			CVK::State::getInstance()->setShader(&pbrShader);
+			pbrShader.update();
+		}
 
 		switch (activeScene)
 		{

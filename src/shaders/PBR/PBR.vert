@@ -9,11 +9,12 @@ layout(location = 4) in vec3 bitangent;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraPosition;
+
+uniform vec3 u_cameraPosition;
 
 out DATA
 {
-	vec4 position;
+	vec3 position;
 	vec3 normal;
 	vec2 uv;
 	vec3 binormal;
@@ -24,7 +25,7 @@ out DATA
 void main()
 {
 	vec4 pos = modelMatrix * position;
-	vs_out.position = pos;
+	vs_out.position = pos.xyz;
 	gl_Position = projectionMatrix * viewMatrix * pos;
 	
 	mat3 model = mat3(modelMatrix);
@@ -33,5 +34,5 @@ void main()
 	vs_out.binormal = model * bitangent;
 	vs_out.tangent = model * tangent;
 	vs_out.uv = texCoord;
-	vs_out.cameraPos = cameraPosition;
+	vs_out.cameraPos = u_cameraPosition;
 }
