@@ -16,7 +16,8 @@ CVK::Perspective projection(glm::radians(60.0f), WIDTH / (float)HEIGHT, 0.1f, 50
 CVK::Trackball* cam_trackball;
 
 //define materials
-CVK::Material *pbr_material = nullptr;
+CVK::Material *pbr_mat_simple = nullptr;
+CVK::Material *pbr_mat1 = nullptr;
 CVK::Material *pbr_mat2 = nullptr;
 
 // ImGui
@@ -24,7 +25,6 @@ float metallic = 1.0f;
 float roughness = 0.2f;
 float ao = 0.0f;
 int activeScene = 0;
-bool useTextures = false;
 bool useCamera = false;
 
 glm::vec3 clear_color = glm::vec3(0.45f, 0.55f, 0.60f);
@@ -63,7 +63,7 @@ void init_lights()
 	//define Light Sources
 	for (int i = -10; i <= 10; i += 20) {
 		for (int j = -10; j <= 10; j += 20) {
-			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(400.0f, 400.0f, 400.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}
@@ -74,10 +74,14 @@ void init_lights()
 
 void init_materials()
 {
-	pbr_material = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
+	pbr_mat_simple = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
+	pbr_mat1 = new CVK::Material(RESOURCES_PATH "/textures/rustediron2_basecolor.png",
+								 RESOURCES_PATH "/textures/rustediron2_normal.png",
+								 RESOURCES_PATH "/textures/rustediron2_metallic.png",
+								 RESOURCES_PATH "/textures/rustediron2_roughness.png",
+								 RESOURCES_PATH "/textures/rustediron2-ao.png");
 	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/textures/export3dcoat_lambert3SG_color.png",
-								 //RESOURCES_PATH "/textures/export3dcoat_lambert3SG_nmap.png",
-								 RESOURCES_PATH "/textures/normalTest.png",
+								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_nmap.png",
 								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_metalness.png",
 								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_gloss.png",
 								 RESOURCES_PATH "/textures/materialball_ao.png");
@@ -86,26 +90,16 @@ void init_materials()
 void init_scene()
 {
 	scene_node = new CVK::Node("Scene");
-
-	CVK::Sphere *sphere = new CVK::Sphere(0.4f, 32);
-
-	for (int i = -2; i <= 2; i++) {
-		for (int j = -2; j <= 2; j++) {
-			CVK::Node *sphere_node = new CVK::Node(std::string("Sphere ") + std::to_string(i) + std::to_string(j));
-			sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0), glm::vec3(i, j, 0.0f)));
-			sphere_node->setMaterial(pbr_material);
-			sphere_node->setGeometry(sphere);
-			scene_node->addChild(sphere_node);
-		}
-	}
+	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	sphere_node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.15f, 0.15f, 0.15f)));
+	sphere_node->setMaterial(pbr_mat_simple);
+	scene_node->addChild(sphere_node);
 
 	scene_node2 = new CVK::Node("Scene");
-	sphere = new CVK::Sphere(1.5f, 64);
-	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"));
-	sphere_node->setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
-	sphere_node->setMaterial(pbr_material);
-	sphere_node->setGeometry(sphere);
-	scene_node2->addChild(sphere_node);
+	CVK::Node *sphere_node2 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	sphere_node2->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.15f, 0.15f, 0.15f)));
+	sphere_node2->setMaterial(pbr_mat1);
+	scene_node2->addChild(sphere_node2);
 
 	scene_node3 = new CVK::Node("Scene");
 	CVK::Node *shaderPresenter = new CVK::Node(std::string("Presenter"), std::string(RESOURCES_PATH "/meshes/export3dcoat.obj"), false);
@@ -151,8 +145,6 @@ void draw_gui()
 	ImGui::ColorEdit3("clear color", (float*)&clear_color);
 	
 	ImGui::InputInt("Active Scene", &activeScene);
-	ImGui::Checkbox("Use Textures", &useTextures);
-	ImGui::SameLine();
 	ImGui::Checkbox("Use Camera", &useCamera);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -179,11 +171,12 @@ int main()
 
 	// Load, compile and link Shader
 	const char *shadernames[2] = { SHADERS_PATH "/PBR/PBRsimple.vert", SHADERS_PATH "/PBR/PBRsimple.frag" };
-	CVK::ShaderPBRsimple pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
+	CVK::ShaderPBRsimple pbrShaderSimple(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
 	const char *shadernames2[2] = { SHADERS_PATH "/PBR/PBR.vert", SHADERS_PATH "/PBR/PBR.frag" };
-	CVK::ShaderPBR pbrShaderMain(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames2);
+	CVK::ShaderPBR pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames2);
 
-	CVK::State::getInstance()->setShader(&pbrShader);
+	CVK::State::getInstance()->setShader(&pbrShaderSimple);
+
 
 	init_camera();
 	init_lights();
@@ -209,32 +202,31 @@ int main()
 		}
 
 		// Use Shader and define camera uniforms
-		pbr_material->setMetallic(metallic);
-		pbr_material->setRoughness(roughness);
-		pbr_material->setAO(ao);
+		pbr_mat_simple->setMetallic(metallic);
+		pbr_mat_simple->setRoughness(roughness);
+		pbr_mat_simple->setAO(ao);
 
-		
-		if (useTextures) {
-			CVK::State::getInstance()->setShader(&pbrShaderMain);
-			pbrShaderMain.update();
-		}
-		else {
-			CVK::State::getInstance()->setShader(&pbrShader);
-			pbrShader.update();
-		}
 
 		switch (activeScene)
 		{
 		case 0:
+			CVK::State::getInstance()->setShader(&pbrShaderSimple);
+			pbrShaderSimple.update();
 			scene_node->render();
 			break;
 		case 1:
+			CVK::State::getInstance()->setShader(&pbrShader);
+			pbrShader.update();
 			scene_node2->render();
 			break;
 		case 2:
+			CVK::State::getInstance()->setShader(&pbrShader);
+			pbrShader.update();
 			scene_node3->render();
 			break;
 		default:
+			CVK::State::getInstance()->setShader(&pbrShaderSimple);
+			pbrShaderSimple.update();
 			scene_node->render();
 			break;
 		}
