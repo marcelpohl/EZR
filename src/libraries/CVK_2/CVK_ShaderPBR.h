@@ -42,6 +42,8 @@ public:
 	*/
 	void update( CVK::Node* node) override;
 
+	void setDisplayMode(int mode);
+
 private:
 	GLuint m_camPosID;
 	GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
@@ -49,6 +51,10 @@ private:
 
 	GLuint m_diffuseMapID, m_normalMapID;
 	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
+
+	int m_displayMode;
+	GLuint m_displayModeID;
+
 };
 
 }

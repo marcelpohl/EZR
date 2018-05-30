@@ -24,6 +24,9 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::S
 		uniformString.str(""); uniformString << "lightColors[" << i << "]";
 		m_lightColorsID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
 	}
+
+	m_displayMode = 0;
+	m_displayModeID = glGetUniformLocation(m_ProgramID, "displayMode");
 }
 
 void CVK::ShaderPBR::update()
@@ -42,6 +45,8 @@ void CVK::ShaderPBR::update()
 		glUniform3fv(m_lightPositionsID[i], 1, glm::value_ptr(*light->getPosition()));
 		glUniform3fv(m_lightColorsID[i], 1, glm::value_ptr(*light->getColor()));
 	}
+
+	glUniform1i(m_displayModeID, m_displayMode);
 }
 
 void CVK::ShaderPBR::update(CVK::Node* node)
@@ -88,4 +93,9 @@ void CVK::ShaderPBR::update(CVK::Node* node)
 			texture->bind();
 		}
 	}
+}
+
+void CVK::ShaderPBR::setDisplayMode(int type)
+{
+	m_displayMode = type;
 }

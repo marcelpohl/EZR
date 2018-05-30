@@ -31,6 +31,7 @@ uniform vec3 lightColors[MAX_LIGHTS];
 
 uniform int numLights;
 
+uniform int displayMode;
 
 struct GeometricAttributes
 {
@@ -42,11 +43,6 @@ struct GeometricAttributes
 
 GeometricAttributes geo_Attributes;
 
-vec3 GammaCorrectTextureRGB(sampler2D tex, vec2 uv)
-{
-	vec4 samp = texture(tex, uv);
-	return vec3(pow(samp.rgb, vec3(GAMMA)));
-}
 
 vec3 GetDiffuse()
 {
@@ -60,7 +56,7 @@ float GetMetallic()
 
 float GetRoughness()
 {
-	return  1.0f - texture(u_RoughnessMap, fs_in.uv).r;
+	return texture(u_RoughnessMap, fs_in.uv).r;
 }
 
 float GetAO()
@@ -122,6 +118,30 @@ void main()
 	geo_Attributes.normal = normalize(fs_in.normal);
 	geo_Attributes.binormal = normalize(fs_in.binormal);
 	geo_Attributes.tangent = normalize(fs_in.tangent);
+
+	switch(displayMode)
+	{
+	case 0:
+		break;
+	case 1:
+		FragColor = vec4(GetDiffuse(), 1.0f);
+		return;
+	case 2:
+		FragColor = vec4(GetNormal(), 1.0f);
+		return;
+	case 3:
+		float metal = GetMetallic();
+		FragColor = vec4(metal, metal, metal, 1.0f);
+		return;
+	case 4:
+		float rough = GetRoughness();
+		FragColor = vec4(rough, rough, rough, 1.0f);
+		return;
+	case 5:
+		float ao = GetAO();
+		FragColor = vec4(ao, ao, ao, 1.0f);
+		return;
+	}
 	
 	vec3  diffuse   = GetDiffuse();
 	float metallic  = GetMetallic();

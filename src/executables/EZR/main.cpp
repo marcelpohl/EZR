@@ -10,6 +10,7 @@ GLFWwindow* window = nullptr;
 CVK::Node *scene_node = nullptr;
 CVK::Node *scene_node2 = nullptr;
 CVK::Node *scene_node3 = nullptr;
+CVK::Node *scene_node4 = nullptr;
 
 //define Camera (Trackball)
 CVK::Perspective projection(glm::radians(60.0f), WIDTH / (float)HEIGHT, 0.1f, 50.f);
@@ -19,14 +20,15 @@ CVK::Trackball* cam_trackball;
 CVK::Material *pbr_mat_simple = nullptr;
 CVK::Material *pbr_mat1 = nullptr;
 CVK::Material *pbr_mat2 = nullptr;
+CVK::Material *pbr_mat3 = nullptr;
 
 // ImGui
 float metallic = 1.0f;
 float roughness = 0.2f;
 float ao = 0.0f;
 int activeScene = 0;
+int displayMode = 0;
 bool useCamera = false;
-
 glm::vec3 clear_color = glm::vec3(0.45f, 0.55f, 0.60f);
 
 void charCallback(GLFWwindow *window, unsigned int key)
@@ -75,37 +77,48 @@ void init_lights()
 void init_materials()
 {
 	pbr_mat_simple = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
-	pbr_mat1 = new CVK::Material(RESOURCES_PATH "/textures/rustediron2_basecolor.png",
-								 RESOURCES_PATH "/textures/rustediron2_normal.png",
-								 RESOURCES_PATH "/textures/rustediron2_metallic.png",
-								 RESOURCES_PATH "/textures/rustediron2_roughness.png",
-								 RESOURCES_PATH "/textures/rustediron2-ao.png");
-	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/textures/export3dcoat_lambert3SG_color.png",
-								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_nmap.png",
-								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_metalness.png",
-								 RESOURCES_PATH "/textures/export3dcoat_lambert3SG_gloss.png",
-								 RESOURCES_PATH "/textures/materialball_ao.png");
+	pbr_mat1 = new CVK::Material(RESOURCES_PATH "/textures/darkTiles/darktiles1_basecolor.png",
+								 RESOURCES_PATH "/textures/darkTiles/darktiles1_normal-OGL.png",
+								 RESOURCES_PATH "/textures/darkTiles/darktiles1_metallic.png",
+								 RESOURCES_PATH "/textures/darkTiles/darktiles1_roughness.png",
+								 RESOURCES_PATH "/textures/darkTiles/darktiles1_AO.png");
+	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/textures/polishMarble/streaked-marble-albedo2.png",
+		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-normal.png",
+		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-metalness.png",
+		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-roughness1.png",
+		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-ao.png");
+	pbr_mat3 = new CVK::Material(RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_color.png",
+								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_nmap.png",
+								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_metalness.png",
+								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_rough.png",
+								 RESOURCES_PATH "/textures/matBall/materialball_ao.png");
 }
 
 void init_scene()
 {
 	scene_node = new CVK::Node("Scene");
 	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
-	sphere_node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.15f, 0.15f, 0.15f)));
+	sphere_node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
 	sphere_node->setMaterial(pbr_mat_simple);
 	scene_node->addChild(sphere_node);
 
 	scene_node2 = new CVK::Node("Scene");
 	CVK::Node *sphere_node2 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
-	sphere_node2->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.15f, 0.15f, 0.15f)));
+	sphere_node2->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
 	sphere_node2->setMaterial(pbr_mat1);
 	scene_node2->addChild(sphere_node2);
 
 	scene_node3 = new CVK::Node("Scene");
+	CVK::Node *sphere_node3 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	sphere_node3->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
+	sphere_node3->setMaterial(pbr_mat2);
+	scene_node3->addChild(sphere_node3);
+
+	scene_node4 = new CVK::Node("Scene");
 	CVK::Node *shaderPresenter = new CVK::Node(std::string("Presenter"), std::string(RESOURCES_PATH "/meshes/export3dcoat.obj"), false);
-	shaderPresenter->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
-	shaderPresenter->setMaterial(pbr_mat2);
-	scene_node3->addChild(shaderPresenter);
+	shaderPresenter->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.25f, 0.25f, 0.25f)));
+	shaderPresenter->setMaterial(pbr_mat3);
+	scene_node4->addChild(shaderPresenter);
 }
 
 void clean_up()
@@ -145,6 +158,7 @@ void draw_gui()
 	ImGui::ColorEdit3("clear color", (float*)&clear_color);
 	
 	ImGui::InputInt("Active Scene", &activeScene);
+	ImGui::InputInt("Display Mode", &displayMode);
 	ImGui::Checkbox("Use Camera", &useCamera);
 
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -206,6 +220,11 @@ int main()
 		pbr_mat_simple->setRoughness(roughness);
 		pbr_mat_simple->setAO(ao);
 
+		if (activeScene < 0 || activeScene > 3)
+			activeScene = 0;
+		if (displayMode < 0 || displayMode > 5)
+			displayMode = 0;
+
 
 		switch (activeScene)
 		{
@@ -216,13 +235,21 @@ int main()
 			break;
 		case 1:
 			CVK::State::getInstance()->setShader(&pbrShader);
+			pbrShader.setDisplayMode(displayMode);
 			pbrShader.update();
 			scene_node2->render();
 			break;
 		case 2:
 			CVK::State::getInstance()->setShader(&pbrShader);
+			pbrShader.setDisplayMode(displayMode);
 			pbrShader.update();
 			scene_node3->render();
+			break;
+		case 3:
+			CVK::State::getInstance()->setShader(&pbrShader);
+			pbrShader.setDisplayMode(displayMode);
+			pbrShader.update();
+			scene_node4->render();
 			break;
 		default:
 			CVK::State::getInstance()->setShader(&pbrShaderSimple);
