@@ -63,15 +63,15 @@ void init_camera()
 void init_lights()
 {
 	//define Light Sources
-	for (int i = -10; i <= 10; i += 20) {
+	/*for (int i = -10; i <= 10; i += 20) {
 		for (int j = -10; j <= 10; j += 20) {
 			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(400.0f, 400.0f, 400.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 			CVK::State::getInstance()->addLight(plight);
 		}
-	}
-	//CVK::Light *plight = new CVK::Light(glm::vec4(0, 0, 10.0f, 1.0f), glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
-	//CVK::State::getInstance()->addLight(plight);
-	//CVK::State::getInstance()->updateSceneSettings(DARKGREY, FOG_LINEAR, WHITE, 1, 50, 1);
+	}*/
+	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	CVK::State::getInstance()->addLight(plight);
+	CVK::State::getInstance()->updateSceneSettings(DARKGREY, FOG_LINEAR, WHITE, 1, 50, 1);
 }
 
 void init_materials()
@@ -82,11 +82,11 @@ void init_materials()
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_metallic.png",
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_roughness.png",
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_AO.png");
-	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/textures/polishMarble/streaked-marble-albedo2.png",
-		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-normal.png",
-		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-metalness.png",
-		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-roughness1.png",
-		                         RESOURCES_PATH "/textures/polishMarble/streaked-marble-ao.png");
+	pbr_mat2 = new CVK::Material(RESOURCES_PATH "/textures/Chest/Chest_Base_Color.png",
+		                         RESOURCES_PATH "/textures/Chest/Chest_Normal_OpenGL.png",
+		                         RESOURCES_PATH "/textures/Chest/Chest_Metallic.png",
+		                         RESOURCES_PATH "/textures/Chest/Chest_Roughness.png",
+		                         RESOURCES_PATH "/textures/Chest/Chest_Mixed_AO.png");
 	pbr_mat3 = new CVK::Material(RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_color.png",
 								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_nmap.png",
 								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_metalness.png",
@@ -109,9 +109,14 @@ void init_scene()
 	scene_node2->addChild(sphere_node2);
 
 	scene_node3 = new CVK::Node("Scene");
-	CVK::Node *sphere_node3 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
-	sphere_node3->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
+	CVK::Node *sphere_node3 = new CVK::Node(std::string("Chest"), std::string(RESOURCES_PATH "/meshes/chest.obj"), false);
+	sphere_node3->setModelMatrix(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f)), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 	sphere_node3->setMaterial(pbr_mat2);
+	scene_node3->addChild(sphere_node3);
+
+	sphere_node3 = new CVK::Node(std::string("Plane"), std::string(RESOURCES_PATH "/meshes/plane.obj"), false);
+	sphere_node3->setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.1f, 0.0f)));
+	sphere_node3->setMaterial(pbr_mat1);
 	scene_node3->addChild(sphere_node3);
 
 	scene_node4 = new CVK::Node("Scene");
