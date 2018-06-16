@@ -25,6 +25,16 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::S
 		m_lightColorsID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
 	}
 
+	m_lightTransformMatrixID = glGetUniformLocation(m_ProgramID, "lightTransformMatrix");
+	m_shadowMapID = glGetUniformLocation(m_ProgramID, "u_shadowMap");
+
+	m_lightViewportMatrix = glm::mat4(
+		0.5, 0.0, 0.0, 0.0,
+		0.0, 0.5, 0.0, 0.0,
+		0.0, 0.0, 0.5, 0.0,
+		0.5, 0.5, 0.5, 1.0
+	);
+
 	m_displayMode = 0;
 	m_displayModeID = glGetUniformLocation(m_ProgramID, "displayMode");
 }
@@ -34,6 +44,12 @@ void CVK::ShaderPBR::update()
 
 	int numLights = CVK::State::getInstance()->getLights()->size();
 	CVK::ShaderMinimal::update();
+
+	glm::mat4 lightTransformMatrix = m_lightViewportMatrix * m_lightProjMatrix * m_lightViewMatrix;
+	glUniformMatrix4fv(m_lightTransformMatrixID, 1, GL_FALSE, glm::value_ptr(lightTransformMatrix));
+	glUniform1i(m_shadowMapID, 2);
+	glActiveTexture(SHADOW_TEXTURE_UNIT);
+	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
 
 	glm::vec3 camPos = CVK::State::getInstance()->getCamera()->getPosition();
 	glUniform3fv(m_camPosID, 1, glm::value_ptr(camPos));
@@ -93,9 +109,24 @@ void CVK::ShaderPBR::update(CVK::Node* node)
 			texture->bind();
 		}
 	}
+
+	if (m_textures.size() > 0) {
+
+	}
+
 }
 
 void CVK::ShaderPBR::setDisplayMode(int type)
 {
 	m_displayMode = type;
+}
+
+void CVK::ShaderPBR::setLightViewMatrix(glm::mat4 *m)
+{
+	m_lightViewMatrix = *m;
+}
+
+void CVK::ShaderPBR::setLightProjMatrix(glm::mat4 *m)
+{
+	m_lightProjMatrix = *m;
 }

@@ -9,6 +9,7 @@ layout(location = 4) in vec3 bitangent;
 uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+uniform mat4 lightTransformMatrix;
 
 uniform vec3 u_cameraPosition;
 
@@ -20,6 +21,7 @@ out DATA
 	vec3 binormal;
 	vec3 tangent;
 	vec3 cameraPos;
+	vec4 fragPosLightSpace;
 } vs_out;
 
 void main()
@@ -35,4 +37,5 @@ void main()
 	vs_out.tangent = model * tangent;
 	vs_out.uv = texCoord;
 	vs_out.cameraPos = u_cameraPosition;
+	vs_out.fragPosLightSpace = lightTransformMatrix * pos;
 }

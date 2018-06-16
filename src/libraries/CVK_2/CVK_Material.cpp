@@ -185,7 +185,7 @@ void CVK::Material::setTexture( TextureType type, const std::string fileName)
 			if(m_colorTexture)
 				m_colorTexture->load( fileName);
 			else
-				m_colorTexture = new Texture( fileName); 
+				m_colorTexture = new Texture( fileName, true); 
 			break;
 		case NORMAL_TEXTURE:
 			if(m_normalTexture)

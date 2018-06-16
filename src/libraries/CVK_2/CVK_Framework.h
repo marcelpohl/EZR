@@ -7,6 +7,7 @@
 #include "CVK_Camera.h"
 #include "CVK_Trackball.h"
 #include "CVK_Pilotview.h"
+#include "CVK_CameraSimple.h"
 
 #include "CVK_Projection.h"
 #include "CVK_Ortho.h"

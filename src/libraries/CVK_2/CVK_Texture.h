@@ -17,7 +17,7 @@ public:
 	 * Constructor for Texture with given parameters. Loads Image File first.
 	 * @param fileName The path to a file which needs to be loaded
 	 */
-	Texture(const std::string fileName);
+	Texture(const std::string fileName, bool sRGB = false);
 	/**
 	* Constructor for Texture with given parameters
 	* @param width The width of the texture
@@ -83,6 +83,7 @@ private:
 
 	unsigned char *m_data = nullptr; //keep copy e.g. for CPU ray tracing
 	int m_bytesPerPixel;
+	bool m_sRGB;
 };
 
 }

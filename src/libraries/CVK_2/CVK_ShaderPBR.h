@@ -43,6 +43,8 @@ public:
 	void update( CVK::Node* node) override;
 
 	void setDisplayMode(int mode);
+	void setLightViewMatrix(glm::mat4 *m);
+	void setLightProjMatrix(glm::mat4 *m);
 
 private:
 	GLuint m_camPosID;
@@ -54,6 +56,10 @@ private:
 
 	int m_displayMode;
 	GLuint m_displayModeID;
+
+	glm::mat4 m_lightViewMatrix, m_lightProjMatrix, m_lightViewportMatrix;
+	GLuint m_lightTransformMatrixID;
+	GLuint m_shadowMapID;
 
 };
 

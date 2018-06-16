@@ -14,6 +14,7 @@ in DATA
 	vec3 binormal;
 	vec3 tangent;
 	vec3 cameraPos;
+	vec4 fragPosLightSpace;
 } fs_in;
 
 
@@ -28,6 +29,7 @@ uniform sampler2D u_AOMap;
 // lights and light properties
 uniform vec3 lightPositions[MAX_LIGHTS];
 uniform vec3 lightColors[MAX_LIGHTS];
+uniform sampler2D u_shadowMap;
 
 uniform int numLights;
 
@@ -109,6 +111,30 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
+float ShadowCalculation()
+{
+	float shadow = 0.0;
+	vec3 shadowCoord = fs_in.fragPosLightSpace.xyz / fs_in.fragPosLightSpace.w;
+	
+	// sample shadow map in area around current position
+	vec2 texelSize = 1.0 / textureSize(u_shadowMap, 0);
+	for(int x = -1; x <= 1; x++)
+    {
+        for(int y = -1; y <= 1; y++)
+        {
+            float pcfDepth = texture(u_shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).z;
+            shadow +=  shadowCoord.z - 0.00005 > pcfDepth ? 1.0 : 0.0;        
+			
+        }    
+    }
+    shadow /= 9.0;
+	
+	if (shadowCoord.z > 1.0)
+		shadow = 0.0;
+	
+	return 1.0 - shadow;
+
+}
 
 
 
@@ -147,6 +173,7 @@ void main()
 	float metallic  = GetMetallic();
 	float roughness = GetRoughness();
 	float ao        = GetAO();
+	roughness 		= roughness*roughness;	// TODO tweak looks (this line is optional)
 	
 	vec3 normal  = GetNormal();
 	vec3 viewVec = normalize(fs_in.cameraPos - fs_in.position);
@@ -164,7 +191,7 @@ void main()
         vec3 lightVec = normalize(lightPositions[i] - fs_in.position);
         vec3 halfVec  = normalize(viewVec + lightVec);
         float distance = length(lightPositions[i] - fs_in.position);
-        float attenuation = 1.0 / (distance * distance);
+        float attenuation = 1.0 / distance;// (distance * distance); 	// TODO tweak looks
         vec3 radiance = lightColors[i] * attenuation;
 
         // Cook-Torrance BRDF
@@ -191,13 +218,16 @@ void main()
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
     vec3 ambient = vec3(0.03) * diffuse * ao;
+	
+	// shadows
+	float shadow = ShadowCalculation();
     
-    vec3 color = ambient + Lo;
+    vec3 color = ambient + shadow * Lo;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));
     // gamma correct
-    color = pow(color, vec3(1.0/2.2)); 
+    color = pow(color, vec3(1.0/GAMMA)); 
 
     FragColor = vec4(color, 1.0);
 	

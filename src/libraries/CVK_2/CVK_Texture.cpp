@@ -3,9 +3,10 @@
 #include "CVK_Texture.h"
 #include "stb_image.h"
 
-CVK::Texture::Texture(const std::string fileName)
+CVK::Texture::Texture(const std::string fileName, bool sRGB)
 {
 	m_textureID = INVALID_GL_VALUE;
+	m_sRGB = sRGB;
 
 	createTexture();
 	load( fileName);
@@ -14,6 +15,7 @@ CVK::Texture::Texture(const std::string fileName)
 CVK::Texture::Texture( int width, int height, int bytesPerPixel, unsigned char *data)
 {
 	m_textureID = INVALID_GL_VALUE;
+	m_sRGB = false;
 
 	createTexture();
 	setTexture(width, height, bytesPerPixel, data);
@@ -21,8 +23,10 @@ CVK::Texture::Texture( int width, int height, int bytesPerPixel, unsigned char *
 
 CVK::Texture::Texture( GLuint texture)
 {
+	m_sRGB = false;
 	setTexture(texture);
 }
+
 
 CVK::Texture::~Texture()
 {
@@ -101,14 +105,26 @@ void CVK::Texture::setTexture( int width, int height, int bytesPerPixel, unsigne
 	glBindTexture( GL_TEXTURE_2D, m_textureID);
 	switch (bytesPerPixel)
 	{
-	case 1:
+	case 1: 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, m_width, m_height, 0, GL_RED, GL_UNSIGNED_BYTE, m_data);
 		break;
 	case 3:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
+		if (m_sRGB)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
+		}
+		else {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, m_data);
+		}
 		break;
 	case 4:
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+		if (m_sRGB)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8_ALPHA8, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+		}
+		else {
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data);
+		}
 		break;
 	default:
 		std::cout << "RESOLVED: Unknown format for bytes per pixel in texture, changed to 4" << std::endl;
