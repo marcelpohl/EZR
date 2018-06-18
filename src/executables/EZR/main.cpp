@@ -20,17 +20,11 @@ int windowHeight = HEIGHT;
 CVK::Perspective projection(glm::radians(60.0f), WIDTH / (float)HEIGHT, 0.1f, 50.f);
 CVK::Trackball* cam_trackball;
 
-CVK::Perspective projectionSM(glm::radians(60.0f), SHADOW_RES / (float)SHADOW_RES, 0.1f, 50.f);
-CVK::CameraSimple* cam_shadowMap;
-
 //define materials
 CVK::Material *pbr_mat_simple = nullptr;
 CVK::Material *pbr_mat1 = nullptr;
 CVK::Material *pbr_mat2 = nullptr;
 CVK::Material *pbr_mat3 = nullptr;
-
-// FBOs
-CVK::FBO *depthMapFBO = nullptr;
 
 // global shaders
 CVK::ShaderMinimal *depthMapShader;
@@ -76,6 +70,8 @@ void init_lights()
 		}
 	}*/
 	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight->setDirectional(true);
+	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 	CVK::State::getInstance()->updateSceneSettings(DARKGREY, FOG_LINEAR, WHITE, 1, 50, 1);
 }
@@ -89,19 +85,6 @@ void init_camera()
 	cam_trackball->setCenter(&center);
 	cam_trackball->setRadius(5.0f);
 	CVK::State::getInstance()->setCamera(cam_trackball);
-
-	// shadow map camera
-	cam_shadowMap = new CVK::CameraSimple(window, WIDTH, HEIGHT, &projectionSM);
-	CVK::Light *light = &CVK::State::getInstance()->getLights()->at(0);
-	glm::vec3 *lightPos = new glm::vec3(*light->getPosition());
-	glm::vec3 *lookAt = new glm::vec3(*light->getSpotDirection());
-	cam_shadowMap->setCamPos(lightPos);
-	cam_shadowMap->setLookAt(lightPos, lookAt);
-}
-
-void init_FBOs()
-{
-	depthMapFBO = new CVK::FBO(SHADOW_RES, SHADOW_RES, 0, true);
 }
 
 void init_materials()
@@ -159,7 +142,6 @@ void init_scene()
 void clean_up()
 {
 	delete cam_trackball;
-	delete cam_shadowMap;
 }
 
 void init_imgui()
@@ -205,26 +187,25 @@ void draw_gui()
 void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader)
 {
 	// 1st pass: render shadow map
-	depthMapFBO->bind();
+	CVK::Light light = CVK::State::getInstance()->getLights()->at(0);
+	if(light.prepareRenderShadowMap())
+	{ 
+		CVK::State::getInstance()->setCamera(light.getLightCamera());
+		CVK::State::getInstance()->setShader(depthMapShader);
+		depthMapShader->update();
 
-	glViewport(0, 0, SHADOW_RES, SHADOW_RES);
-	glClear(GL_DEPTH_BUFFER_BIT);
+		scene->render();
 
-	CVK::State::getInstance()->setCamera(cam_shadowMap);
-	CVK::State::getInstance()->setShader(depthMapShader);
-	depthMapShader->update();
-
-	scene->render();
-
-	depthMapFBO->unbind();
+		light.finishRenderShadowMap();
+	}
 
 	// 2nd pass: render scene normally
 	CVK::ShaderPBR *s = dynamic_cast<CVK::ShaderPBR *>(shader);
 	if (NULL != s)
 	{
-		s->setLightViewMatrix(cam_shadowMap->getView());
-		s->setLightProjMatrix(cam_shadowMap->getProjection()->getProjMatrix());
-		s->setTextureInput(0, depthMapFBO->getDepthTexture());
+		s->setLightViewMatrix(light.getLightCamera()->getView());
+		s->setLightProjMatrix(light.getLightCamera()->getProjection()->getProjMatrix());
+		s->setTextureInput(0, light.getShadowMap());
 	}
 
 	glViewport(0, 0, windowWidth, windowHeight);
@@ -268,7 +249,6 @@ int main()
 
 	init_lights();
 	init_camera();
-	init_FBOs();
 	init_materials();
 	init_scene();
 	init_imgui();
@@ -286,11 +266,14 @@ int main()
 		double deltaTime = glfwGetTime() - time;
 		time = glfwGetTime();
 
-		CVK::State::getInstance()->setCamera(cam_shadowMap);
-		cam_shadowMap->update(deltaTime);
+		
+		CVK::Light light = CVK::State::getInstance()->getLights()->at(0);
+		if (light.castsShadow())
+		{
+			light.getLightCamera()->update(deltaTime);
+		}
 
 		if (useCamera) {
-			CVK::State::getInstance()->setCamera(cam_trackball);
 			cam_trackball->update(deltaTime);
 		}
 

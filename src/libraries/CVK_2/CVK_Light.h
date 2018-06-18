@@ -2,6 +2,9 @@
 #define __CVK_LIGHT_H
 
 #include "CVK_Defs.h"
+#include "CVK_CameraSimple.h"
+#include "CVK_FBO.h"
+#include "CVK_Perspective.h"
 
 namespace CVK
 {
@@ -89,12 +92,33 @@ public:
 	 */
 	float getSpotCutoff() const;
 
+	CameraSimple* getLightCamera();
+
+	void setCastShadow(bool b, GLFWwindow* window);
+	bool castsShadow();
+
+	void setDirectional(bool b);
+	bool isDirectional();
+
+	bool prepareRenderShadowMap();
+	void finishRenderShadowMap();
+	GLuint getShadowMap();
+
 private:
 	glm::vec4 m_position; //!< the position of the light source in 3D 
 	glm::vec3 m_color; //!< the color for lighting 
 	glm::vec3 m_spotDirection; //!< the direction of the light  
 	float m_spotExponent; //!< the exponent for spot lights 
 	float m_spotCutoff; //!< the cutoff angle for spot lights 
+
+	CVK::FBO *m_shadowMapFBO = nullptr;
+	CameraSimple *m_lightCamera = nullptr;
+	CVK::Perspective *m_projection = nullptr;
+	bool m_castShadow = false;
+	bool m_isDirectional = false;
+
+	int m_shadowWidth = 1024;
+	int m_shadowHeight = 1024;
 };
 
 }
