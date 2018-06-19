@@ -19,10 +19,14 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::S
 	m_numLightsID = glGetUniformLocation(m_ProgramID, "numLights");
 	for (auto i = 0; i < MAX_LIGHTS; ++i)
 	{
-		uniformString.str(""); uniformString << "lightPositions[" << i << "]";
+		uniformString.str(""); uniformString << "light[" << i << "].position";
 		m_lightPositionsID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
-		uniformString.str(""); uniformString << "lightColors[" << i << "]";
+		uniformString.str(""); uniformString << "light[" << i << "].color";
 		m_lightColorsID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
+		uniformString.str(""); uniformString << "light[" << i << "].directional";
+		m_lightDirectionalID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
+		uniformString.str(""); uniformString << "light[" << i << "].castShadow";
+		m_lightCastShadowID[i] = glGetUniformLocation(m_ProgramID, uniformString.str().c_str());
 	}
 
 	m_lightTransformMatrixID = glGetUniformLocation(m_ProgramID, "lightTransformMatrix");
@@ -60,6 +64,8 @@ void CVK::ShaderPBR::update()
 		CVK::Light *light = &CVK::State::getInstance()->getLights()->at(i);
 		glUniform3fv(m_lightPositionsID[i], 1, glm::value_ptr(*light->getPosition()));
 		glUniform3fv(m_lightColorsID[i], 1, glm::value_ptr(*light->getColor()));
+		glUniform1i(m_lightDirectionalID[i], light->isDirectional());
+		glUniform1i(m_lightCastShadowID[i], light->castsShadow());
 	}
 
 	glUniform1i(m_displayModeID, m_displayMode);

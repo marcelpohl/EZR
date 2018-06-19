@@ -59,6 +59,7 @@ private:
 
 	glm::mat4 m_lightViewMatrix, m_lightProjMatrix, m_lightViewportMatrix;
 	GLuint m_lightTransformMatrixID;
+	GLuint m_lightDirectionalID[MAX_LIGHTS], m_lightCastShadowID[MAX_LIGHTS];
 	GLuint m_shadowMapID;
 
 };

@@ -27,8 +27,12 @@ uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_AOMap;
 
 // lights and light properties
-uniform vec3 lightPositions[MAX_LIGHTS];
-uniform vec3 lightColors[MAX_LIGHTS];
+uniform struct LIGHT {
+	vec3 position;
+	vec3 color;
+	bool directional;
+	bool castShadow;
+} light[MAX_LIGHTS];
 uniform sampler2D u_shadowMap;
 
 uniform int numLights;
@@ -188,11 +192,11 @@ void main()
     for(int i = 0; i < numLights; ++i) 
     {
         // calculate per-light radiance
-        vec3 lightVec = normalize(lightPositions[i] - fs_in.position);
+        vec3 lightVec = normalize(light[i].position - fs_in.position);
         vec3 halfVec  = normalize(viewVec + lightVec);
-        float distance = length(lightPositions[i] - fs_in.position);
+        float distance = length(light[i].position - fs_in.position);
         float attenuation = 1.0 / distance;// (distance * distance); 	// TODO tweak looks
-        vec3 radiance = lightColors[i] * attenuation;
+        vec3 radiance = light[i].color * attenuation;
 
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(normal, halfVec, roughness);   
@@ -220,7 +224,11 @@ void main()
     vec3 ambient = vec3(0.03) * diffuse * ao;
 	
 	// shadows
-	float shadow = ShadowCalculation();
+	float shadow = 1.0f;
+	if(light[0].castShadow == true)
+	{
+		shadow = ShadowCalculation();
+	}
     
     vec3 color = ambient + shadow * Lo;
 
