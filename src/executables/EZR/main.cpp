@@ -222,7 +222,7 @@ int main()
 {
 	// Init GLFW and GLEW
 	glfwInit();
-	CVK::useOpenGL33CoreProfile();
+	CVK::useOpenGL45CoreProfile();
 	window = glfwCreateWindow(WIDTH, HEIGHT, "Physical Based Rendering", nullptr, nullptr);
 	glfwSetWindowPos(window, 100, 50);
 	glfwMakeContextCurrent(window);
@@ -267,10 +267,14 @@ int main()
 		time = glfwGetTime();
 
 		
-		CVK::Light light = CVK::State::getInstance()->getLights()->at(0);
-		if (light.castsShadow())
+		CVK::Light *light = &CVK::State::getInstance()->getLights()->at(0);
+		glm::vec4 lightPos = *(light->getPosition());
+		lightPos = glm::rotate(glm::mat4(1.0f), glm::radians(20.0f * (float)deltaTime), glm::vec3(0.0f, 1.0f, 0.0f)) * lightPos;
+		light->setPosition(lightPos);
+
+		if (light->castsShadow())
 		{
-			light.getLightCamera()->update(deltaTime);
+			light->getLightCamera()->update(deltaTime);
 		}
 
 		if (useCamera) {

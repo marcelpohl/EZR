@@ -47,8 +47,19 @@ public:
 	void setLightProjMatrix(glm::mat4 *m);
 
 private:
+
+	struct lightSSBO {
+		glm::vec3 position;
+		bool directional;
+		glm::vec3 color;
+		bool castShadow;
+	};
+
+	GLuint m_lightSSBOID;
+	std::vector<lightSSBO> m_lightSSBO;
+
 	GLuint m_camPosID;
-	GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
+	//GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
 	GLuint m_numLightsID;
 
 	GLuint m_diffuseMapID, m_normalMapID;
@@ -59,9 +70,10 @@ private:
 
 	glm::mat4 m_lightViewMatrix, m_lightProjMatrix, m_lightViewportMatrix;
 	GLuint m_lightTransformMatrixID;
-	GLuint m_lightDirectionalID[MAX_LIGHTS], m_lightCastShadowID[MAX_LIGHTS];
+	//GLuint m_lightDirectionalID[MAX_LIGHTS], m_lightCastShadowID[MAX_LIGHTS];
 	GLuint m_shadowMapID;
 
+	void updateLights();
 };
 
 }

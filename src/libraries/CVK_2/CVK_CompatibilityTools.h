@@ -9,6 +9,7 @@ namespace CVK
 	 * Use OpenGL Core Profile if using Apple
 	 */
 	void useOpenGL33CoreProfile();
+	void useOpenGL45CoreProfile();
 	/**
 	 * check the compatibility of the hardware by giving useful output
 	 */

@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 core
 
 const int MAX_LIGHTS = 8;
 const float PI = 3.1415926535897932384626433832795;

@@ -14,6 +14,20 @@ void CVK::useOpenGL33CoreProfile()
   #endif
 }
 
+void CVK::useOpenGL45CoreProfile()
+{
+
+#if defined(__APPLE__) || defined(__linux__)
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	glewExperimental = GL_TRUE;
+#endif
+}
+
+
 void CVK::checkCompatibility()
 {
         

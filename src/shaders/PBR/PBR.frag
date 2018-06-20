@@ -1,4 +1,7 @@
-#version 330 core
+#version 450 core
+#extension GL_ARB_bindless_texture : require
+#extension GL_NV_gpu_shader5:require
+
 const int MAX_LIGHTS = 8;
 const float PI = 3.1415926535897932384626433832795;
 const float GAMMA = 2.2;
@@ -27,12 +30,18 @@ uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_AOMap;
 
 // lights and light properties
-uniform struct LIGHT {
+struct LIGHT {
 	vec3 position;
-	vec3 color;
 	bool directional;
+	vec3 color;
 	bool castShadow;
-} light[MAX_LIGHTS];
+};
+
+layout(std430, binding = 0) readonly buffer lights_ssbo
+{
+	LIGHT lights[];
+};
+
 uniform sampler2D u_shadowMap;
 
 uniform int numLights;
@@ -191,12 +200,14 @@ void main()
     vec3 Lo = vec3(0.0);
     for(int i = 0; i < numLights; ++i) 
     {
+		LIGHT light = lights[i];
+	
         // calculate per-light radiance
-        vec3 lightVec = normalize(light[i].position - fs_in.position);
+        vec3 lightVec = normalize(light.position - fs_in.position);
         vec3 halfVec  = normalize(viewVec + lightVec);
-        float distance = length(light[i].position - fs_in.position);
+        float distance = length(light.position - fs_in.position);
         float attenuation = 1.0 / distance;// (distance * distance); 	// TODO tweak looks
-        vec3 radiance = light[i].color * attenuation;
+        vec3 radiance = light.color * attenuation;
 
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(normal, halfVec, roughness);   
@@ -217,6 +228,12 @@ void main()
 
         // add to outgoing radiance Lo
         Lo += (kD * diffuse / PI + specular) * radiance * NdotL;
+		
+		if (light.castShadow)
+		{
+			float shadow = ShadowCalculation();
+			Lo *= shadow;
+		}
     }   
     
     // ambient lighting (note that the next IBL tutorial will replace 
@@ -224,13 +241,13 @@ void main()
     vec3 ambient = vec3(0.03) * diffuse * ao;
 	
 	// shadows
-	float shadow = 1.0f;
-	if(light[0].castShadow == true)
-	{
-		shadow = ShadowCalculation();
-	}
+	//float shadow = 1.0f;
+	//if(light[0].castShadow == true)
+	//{
+	//	shadow = ShadowCalculation();
+	//}
     
-    vec3 color = ambient + shadow * Lo;
+    vec3 color = ambient + Lo;
 
     // HDR tonemapping
     color = color / (color + vec3(1.0));

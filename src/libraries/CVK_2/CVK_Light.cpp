@@ -127,6 +127,10 @@ bool CVK::Light::prepareRenderShadowMap()
 		glViewport(0, 0, m_shadowWidth, m_shadowHeight);
 		glClear(GL_DEPTH_BUFFER_BIT);
 
+		glm::vec3 *lightPos = new glm::vec3(m_position);
+		m_lightCamera->setCamPos(lightPos);
+		m_lightCamera->setLookAt(lightPos, &m_spotDirection);
+
 		return true;
 	}
 
