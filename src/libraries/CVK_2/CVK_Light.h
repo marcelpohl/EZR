@@ -100,9 +100,12 @@ public:
 	void setDirectional(bool b);
 	bool isDirectional();
 
+	glm::mat4* getLightVPMatrix();
+
 	bool prepareRenderShadowMap();
 	void finishRenderShadowMap();
 	GLuint getShadowMap();
+
 
 private:
 	glm::vec4 m_position; //!< the position of the light source in 3D 
@@ -114,6 +117,8 @@ private:
 	CVK::FBO *m_shadowMapFBO = nullptr;
 	CameraSimple *m_lightCamera = nullptr;
 	CVK::Perspective *m_projection = nullptr;
+	glm::mat4 m_lightVPMatrix = glm::mat4(1.0f);
+
 	bool m_castShadow = false;
 	bool m_isDirectional = false;
 

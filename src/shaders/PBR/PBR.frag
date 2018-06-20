@@ -11,13 +11,12 @@ out vec4 FragColor;
 
 in DATA
 {
-	vec3 position;
+	vec4 position;
 	vec3 normal;
 	vec2 uv;
 	vec3 binormal;
 	vec3 tangent;
 	vec3 cameraPos;
-	vec4 fragPosLightSpace;
 } fs_in;
 
 
@@ -35,6 +34,7 @@ struct LIGHT {
 	bool directional;
 	vec3 color;
 	bool castShadow;
+	mat4 lightMatrix;
 };
 
 layout(std430, binding = 0) readonly buffer lights_ssbo
@@ -42,9 +42,10 @@ layout(std430, binding = 0) readonly buffer lights_ssbo
 	LIGHT lights[];
 };
 
-uniform sampler2D u_shadowMap;
-
-uniform int numLights;
+layout(std430, binding = 1) readonly buffer shadowMaps_ssbo
+{
+	uint64_t shadowMapHandle[];
+};
 
 uniform int displayMode;
 
@@ -124,18 +125,20 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
 
-float ShadowCalculation()
+float ShadowCalculation(int i, vec4 fragPosLightSpace)
 {
 	float shadow = 0.0;
-	vec3 shadowCoord = fs_in.fragPosLightSpace.xyz / fs_in.fragPosLightSpace.w;
+	vec3 shadowCoord = fragPosLightSpace.xyz / fragPosLightSpace.w;
+	
+	sampler2D shadowMap = sampler2D(shadowMapHandle[i]);
 	
 	// sample shadow map in area around current position
-	vec2 texelSize = 1.0 / textureSize(u_shadowMap, 0);
+	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 	for(int x = -1; x <= 1; x++)
     {
         for(int y = -1; y <= 1; y++)
         {
-            float pcfDepth = texture(u_shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).z;
+            float pcfDepth = texture(shadowMap, shadowCoord.xy + vec2(x, y) * texelSize).z;
             shadow +=  shadowCoord.z - 0.00005 > pcfDepth ? 1.0 : 0.0;        
 			
         }    
@@ -189,7 +192,7 @@ void main()
 	roughness 		= roughness*roughness;	// TODO tweak looks (this line is optional)
 	
 	vec3 normal  = GetNormal();
-	vec3 viewVec = normalize(fs_in.cameraPos - fs_in.position);
+	vec3 viewVec = normalize(fs_in.cameraPos - geo_Attributes.pos);
 	
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the diffuse color as F0 (metallic workflow)    
@@ -198,14 +201,14 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < numLights; ++i) 
+    for(int i = 0; i < lights.length(); ++i) 
     {
 		LIGHT light = lights[i];
 	
         // calculate per-light radiance
-        vec3 lightVec = normalize(light.position - fs_in.position);
+        vec3 lightVec = normalize(light.position - geo_Attributes.pos);
         vec3 halfVec  = normalize(viewVec + lightVec);
-        float distance = length(light.position - fs_in.position);
+        float distance = length(light.position - geo_Attributes.pos);
         float attenuation = 1.0 / distance;// (distance * distance); 	// TODO tweak looks
         vec3 radiance = light.color * attenuation;
 
@@ -225,27 +228,22 @@ void main()
 
         // scale light by NdotL
         float NdotL = max(dot(normal, lightVec), 0.0);        
-
-        // add to outgoing radiance Lo
-        Lo += (kD * diffuse / PI + specular) * radiance * NdotL;
 		
+		float shadow = 1.0;
 		if (light.castShadow)
 		{
-			float shadow = ShadowCalculation();
-			Lo *= shadow;
+			vec4 shadowCoord = light.lightMatrix * fs_in.position;
+			shadow = ShadowCalculation(i, shadowCoord);
 		}
+		
+        // add to outgoing radiance Lo
+        Lo += shadow * (kD * diffuse / PI + specular) * radiance * NdotL;
+
     }   
     
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
     vec3 ambient = vec3(0.03) * diffuse * ao;
-	
-	// shadows
-	//float shadow = 1.0f;
-	//if(light[0].castShadow == true)
-	//{
-	//	shadow = ShadowCalculation();
-	//}
     
     vec3 color = ambient + Lo;
 

@@ -15,12 +15,8 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::S
 	m_aoMapID = glGetUniformLocation(m_ProgramID, "u_AOMap");
 
 	// light uniforms
-	std::stringstream uniformString;
-	m_numLightsID = glGetUniformLocation(m_ProgramID, "numLights");
 	m_lightSSBOID = GL_INVALID_VALUE;
-
-	m_lightTransformMatrixID = glGetUniformLocation(m_ProgramID, "lightTransformMatrix");
-	m_shadowMapID = glGetUniformLocation(m_ProgramID, "u_shadowMap");
+	m_shadowMapSSBOID = GL_INVALID_VALUE;
 
 	m_lightViewportMatrix = glm::mat4(
 		0.5, 0.0, 0.0, 0.0,
@@ -40,12 +36,7 @@ void CVK::ShaderPBR::update()
 
 	updateLights();
 
-	glm::mat4 lightTransformMatrix = m_lightViewportMatrix * m_lightProjMatrix * m_lightViewMatrix;
-	glUniformMatrix4fv(m_lightTransformMatrixID, 1, GL_FALSE, glm::value_ptr(lightTransformMatrix));
-	glUniform1i(m_shadowMapID, 2);
-	glActiveTexture(SHADOW_TEXTURE_UNIT);
-	glBindTexture(GL_TEXTURE_2D, m_textures[0]);
-	
+
 	glm::vec3 camPos = CVK::State::getInstance()->getCamera()->getPosition();
 	glUniform3fv(m_camPosID, 1, glm::value_ptr(camPos));
 
@@ -103,20 +94,9 @@ void CVK::ShaderPBR::setDisplayMode(int type)
 	m_displayMode = type;
 }
 
-void CVK::ShaderPBR::setLightViewMatrix(glm::mat4 *m)
-{
-	m_lightViewMatrix = *m;
-}
-
-void CVK::ShaderPBR::setLightProjMatrix(glm::mat4 *m)
-{
-	m_lightProjMatrix = *m;
-}
-
 void CVK::ShaderPBR::updateLights()
 {
 	int numLights = CVK::State::getInstance()->getLights()->size();
-	glUniform1i(m_numLightsID, numLights);
 
 	if (m_lightSSBOID == GL_INVALID_VALUE)
 	{
@@ -126,22 +106,44 @@ void CVK::ShaderPBR::updateLights()
 		glGenBuffers(1, &m_lightSSBOID);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightSSBOID);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, m_lightSSBO.size() * sizeof(lightSSBO), m_lightSSBO.data(), GL_STATIC_COPY);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_lightSSBOID);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	}
-	
-	for (auto i = 0; i < numLights; i++)
+
+	for (int i = 0; i < numLights; i++)
 	{
 		CVK::Light *light = &CVK::State::getInstance()->getLights()->at(i);
 		m_lightSSBO[i].position = glm::vec3(*light->getPosition());
 		m_lightSSBO[i].color = *light->getColor();
 		m_lightSSBO[i].castShadow = light->castsShadow();
 		m_lightSSBO[i].directional = light->isDirectional();
+		m_lightSSBO[i].lightMatrix = m_lightViewportMatrix * *light->getLightVPMatrix();
 	}
 	
+
+	if (m_shadowMapSSBOID == GL_INVALID_VALUE)
+	{
+		//m_shadowMapHandle = glGetTextureHandleARB(m_textures[0]);
+		//glMakeTextureHandleResidentARB(m_shadowMapHandle);
+		for (int i = 0; i < numLights; i++)
+		{
+			GLuint64 shadowMapHandle = 0;
+			if (m_lightSSBO[i].castShadow == true) {
+				shadowMapHandle = glGetTextureHandleARB(CVK::State::getInstance()->getLights()->at(i).getShadowMap());
+				glMakeTextureHandleResidentARB(shadowMapHandle);
+			}
+			m_shadowMapSSBO.push_back(shadowMapHandle);
+		}
+
+		glGenBuffers(1, &m_shadowMapSSBOID);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_shadowMapSSBOID);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, m_shadowMapSSBO.size() * sizeof(GLuint64), m_shadowMapSSBO.data(), GL_STATIC_COPY);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_shadowMapSSBOID);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+	}
+
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_lightSSBOID);
 	glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, m_lightSSBO.size() * sizeof(lightSSBO), m_lightSSBO.data());
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_lightSSBOID);
 	glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-	
+		
 }

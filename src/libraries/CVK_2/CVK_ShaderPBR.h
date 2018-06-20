@@ -43,8 +43,6 @@ public:
 	void update( CVK::Node* node) override;
 
 	void setDisplayMode(int mode);
-	void setLightViewMatrix(glm::mat4 *m);
-	void setLightProjMatrix(glm::mat4 *m);
 
 private:
 
@@ -53,14 +51,17 @@ private:
 		bool directional;
 		glm::vec3 color;
 		bool castShadow;
+		glm::mat4 lightMatrix;
 	};
 
 	GLuint m_lightSSBOID;
 	std::vector<lightSSBO> m_lightSSBO;
 
+	GLuint m_shadowMapSSBOID;
+	std::vector<GLuint64> m_shadowMapSSBO;
+	//GLuint64 m_shadowMapHandle;
+
 	GLuint m_camPosID;
-	//GLuint m_lightPositionsID[MAX_LIGHTS], m_lightColorsID[MAX_LIGHTS];
-	GLuint m_numLightsID;
 
 	GLuint m_diffuseMapID, m_normalMapID;
 	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
@@ -68,10 +69,7 @@ private:
 	int m_displayMode;
 	GLuint m_displayModeID;
 
-	glm::mat4 m_lightViewMatrix, m_lightProjMatrix, m_lightViewportMatrix;
-	GLuint m_lightTransformMatrixID;
-	//GLuint m_lightDirectionalID[MAX_LIGHTS], m_lightCastShadowID[MAX_LIGHTS];
-	GLuint m_shadowMapID;
+	glm::mat4 m_lightViewportMatrix;
 
 	void updateLights();
 };

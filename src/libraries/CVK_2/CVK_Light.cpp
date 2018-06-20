@@ -118,6 +118,14 @@ bool CVK::Light::isDirectional()
 }
 
 
+glm::mat4* CVK::Light::getLightVPMatrix()
+{
+	m_lightVPMatrix =
+		*m_lightCamera->getProjection()->getProjMatrix() *
+		*m_lightCamera->getView();
+	return &m_lightVPMatrix;
+}
+
 bool CVK::Light::prepareRenderShadowMap()
 {
 	if (m_castShadow)
