@@ -86,7 +86,10 @@ bool CVK::CubeMapTexture::load(const std::vector<std::string>& fileNames)
 
 void CVK::CubeMapTexture::bind() const
 {
-	if (m_textureID != INVALID_GL_VALUE)  glBindTexture( GL_TEXTURE_CUBE_MAP, m_textureID);
+	if (m_textureID != INVALID_GL_VALUE)  
+		glBindTexture( GL_TEXTURE_CUBE_MAP, m_textureID);
+	else
+		std::cout << "Texture image was not bound" << std::endl;
 }
 
 void CVK::CubeMapTexture::setCubeMapTexture(GLuint texture)

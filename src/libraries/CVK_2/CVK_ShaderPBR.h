@@ -7,6 +7,7 @@
 #include "CVK_Material.h"
 #include "CVK_Geometry.h"
 #include "CVK_ShaderMinimal.h"
+#include "CVK_Environment.h"
 
 namespace CVK
 {
@@ -26,7 +27,7 @@ public:
 	* @param shader_mask Describes which shader files are used
 	* @param shaderPaths Array of paths to shader files
 	*/
-	ShaderPBR( GLuint shader_mask, const char** shaderPaths);
+	ShaderPBR( GLuint shader_mask, const char** shaderPaths, CVK::Environment* environment );
 
 	/**
 	* Sets scene dependent variables in Shader. Namely light and fog informations set in State.
@@ -71,10 +72,12 @@ private:
 
 	GLuint m_diffuseMapID, m_normalMapID;
 	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
+	GLuint m_irradianceMapID;
 
 	int m_displayMode;
 	GLuint m_displayModeID;
 
+	CVK::Environment* m_environement;
 	glm::mat4 m_lightViewportMatrix;
 
 	void updateLights();

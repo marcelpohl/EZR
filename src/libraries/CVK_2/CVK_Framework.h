@@ -37,6 +37,8 @@
 #include "CVK_ShaderPostProcessing.h"
 #include "CVK_ShaderSimpleTexture.h"
 #include "CVK_ShaderShadowCubemap.h"
+#include "CVK_ShaderCubeMap.h"
+#include "CVK_Environment.h"
 
 #include "CVK_State.h"
 

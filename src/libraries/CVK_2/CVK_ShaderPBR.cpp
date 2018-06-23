@@ -2,8 +2,10 @@
 
 #include <sstream>
 
-CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::ShaderMinimal(shader_mask, shaderPaths)
+CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths, CVK::Environment* environment) : CVK::ShaderMinimal(shader_mask, shaderPaths)
 {
+	m_environement = environment;
+
 	// camera uniforms
 	m_camPosID = glGetUniformLocation(m_ProgramID, "u_cameraPosition");
 
@@ -13,6 +15,7 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::S
 	m_metallicMapID = glGetUniformLocation(m_ProgramID, "u_MetallicMap");
 	m_roughnessMapID = glGetUniformLocation(m_ProgramID, "u_RoughnessMap");
 	m_aoMapID = glGetUniformLocation(m_ProgramID, "u_AOMap");
+	m_irradianceMapID = glGetUniformLocation(m_ProgramID, "u_Irradiance");
 
 	// light uniforms
 	m_lightSSBOID = GL_INVALID_VALUE;
@@ -84,6 +87,10 @@ void CVK::ShaderPBR::update(CVK::Node* node)
 			texture = mat->getTexture(AO_TEXTURE);
 			texture->bind();
 		}
+
+		glUniform1i(m_irradianceMapID, 7);
+		glActiveTexture(GL_TEXTURE7);
+		m_environement->getIrradianceMap()->bind();
 	}
 }
 

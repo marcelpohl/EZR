@@ -27,6 +27,7 @@ uniform sampler2D u_NormalMap;
 uniform sampler2D u_MetallicMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_AOMap;
+uniform samplerCube u_Irradiance;
 
 // lights and light properties
 struct LIGHT {
@@ -298,9 +299,13 @@ void main()
 
     }   
     
-    // ambient lighting (note that the next IBL tutorial will replace 
-    // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * diffuse * ao;
+    // ambient lighting (we now use IBL as the ambient term)
+    vec3 kS = fresnelSchlick(max(dot(normal, viewVec), 0.0), F0);
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+    vec3 irradiance = texture(u_Irradiance, normal).rgb;
+    vec3 d      = irradiance * diffuse;
+    vec3 ambient = (kD * d) * ao;
     
     vec3 color = ambient + Lo;
 
