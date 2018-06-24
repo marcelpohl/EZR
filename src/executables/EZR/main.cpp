@@ -25,15 +25,18 @@ CVK::Material *pbr_mat_simple = nullptr;
 CVK::Material *pbr_mat1 = nullptr;
 CVK::Material *pbr_mat2 = nullptr;
 CVK::Material *pbr_mat3 = nullptr;
+CVK::Material *pbr_mat4 = nullptr;
 
 // global shaders
 CVK::ShaderMinimal *depthMapShader;
+CVK::ShaderShadowCubemap *shadowCubemapShader;
 
 // ImGui
 float metallic = 1.0f;
 float roughness = 0.2f;
 float ao = 0.0f;
 int activeScene = 0;
+int lastScene = 0;
 int displayMode = 0;
 bool useCamera = false;
 glm::vec3 clear_color = glm::vec3(0.45f, 0.55f, 0.60f);
@@ -69,13 +72,18 @@ void init_lights()
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}*/
-	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
-	plight->setDirectional(true);
+	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
-	plight->setDirectional(true);
+	plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight->setType(0);
+	plight->setCastShadow(true, window);
+	CVK::State::getInstance()->addLight(plight);
+
+	plight = new CVK::Light(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight->setType(1);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
@@ -111,33 +119,67 @@ void init_materials()
 								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_metalness.png",
 								 RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_rough.png",
 								 RESOURCES_PATH "/textures/matBall/materialball_ao.png");
+	pbr_mat4 = new CVK::Material(RESOURCES_PATH "/textures/polishMarble/streaked-marble-albedo2.png",
+								 RESOURCES_PATH "/textures/polishMarble/streaked-marble-normal.png",
+								 RESOURCES_PATH "/textures/polishMarble/streaked-marble-metalness.png",
+								 RESOURCES_PATH "/textures/polishMarble/streaked-marble-roughness1.png",
+								 RESOURCES_PATH "/textures/polishMarble/streaked-marble-ao.png");
 }
 
 void init_scene()
 {
+	/****************************
+	* Scene 1 - simple Shader
+	*****************************/
 	scene_node = new CVK::Node("Scene");
 	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
 	sphere_node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
 	sphere_node->setMaterial(pbr_mat_simple);
 	scene_node->addChild(sphere_node);
 
+	/****************************
+	* Scene 2 - Chest and directional light
+	*****************************/
 	scene_node2 = new CVK::Node("Scene");
-	CVK::Node *sphere_node2 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
-	sphere_node2->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
+	CVK::Node *sphere_node2 = new CVK::Node(std::string("Chest"), std::string(RESOURCES_PATH "/meshes/chest.obj"), false);
+	sphere_node2->setModelMatrix(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f)), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+	sphere_node2->setMaterial(pbr_mat2);
+	scene_node2->addChild(sphere_node2);
+
+	sphere_node2 = new CVK::Node(std::string("Plane"), std::string(RESOURCES_PATH "/meshes/plane.obj"), false);
+	sphere_node2->setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.1f, 0.0f)));
 	sphere_node2->setMaterial(pbr_mat1);
 	scene_node2->addChild(sphere_node2);
 
+
+	/****************************
+	* Scene 3 - Omnidirectional Shadows
+	*****************************/
 	scene_node3 = new CVK::Node("Scene");
-	CVK::Node *sphere_node3 = new CVK::Node(std::string("Chest"), std::string(RESOURCES_PATH "/meshes/chest.obj"), false);
-	sphere_node3->setModelMatrix(glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.0f, 0.0f)), glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-	sphere_node3->setMaterial(pbr_mat2);
-	scene_node3->addChild(sphere_node3);
+	CVK::Node *openCube = new CVK::Node(std::string("Cube"), std::string(RESOURCES_PATH "/meshes/openCube.obj"), false);
+	openCube->setModelMatrix(glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(0.7f, 0.7f, 0.7f)), glm::vec3(0.0f, 1.0f, 0.0f)));
+	openCube->setMaterial(pbr_mat4);
+	scene_node3->addChild(openCube);
 
-	sphere_node3 = new CVK::Node(std::string("Plane"), std::string(RESOURCES_PATH "/meshes/plane.obj"), false);
-	sphere_node3->setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.1f, 0.0f)));
+	CVK::Node *group = new CVK::Node(std::string("Group"));
+	scene_node3->addChild(group);
+	CVK::Node *sphere_node3 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	sphere_node3->setModelMatrix(glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -2.0f)), glm::vec3(0.1f, 0.1f, 0.1f)));
 	sphere_node3->setMaterial(pbr_mat1);
-	scene_node3->addChild(sphere_node3);
+	group->addChild(sphere_node3);
+	CVK::Node *sphere_node4 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	sphere_node4->setModelMatrix(glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, -0.5f, 2.0f)), glm::vec3(0.1f, 0.1f, 0.1f)));
+	sphere_node4->setMaterial(pbr_mat1);
+	group->addChild(sphere_node4);
+	CVK::Node *sphere_node5 = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	sphere_node5->setModelMatrix(glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, -0.5f, 2.0f)), glm::vec3(0.1f, 0.1f, 0.1f)));
+	sphere_node5->setMaterial(pbr_mat1);
+	group->addChild(sphere_node5);
 
+
+	/****************************
+	* Scene 4 - Presenter
+	*****************************/
 	scene_node4 = new CVK::Node("Scene");
 	CVK::Node *shaderPresenter = new CVK::Node(std::string("Presenter"), std::string(RESOURCES_PATH "/meshes/export3dcoat.obj"), false);
 	shaderPresenter->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.25f, 0.25f, 0.25f)));
@@ -194,14 +236,20 @@ void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader)
 {
 	// 1st pass: render shadow maps
 	CVK::Light *light = nullptr;
-	for (int i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
+	for (size_t i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
 		light = &CVK::State::getInstance()->getLights()->at(i);
 		if (light->prepareRenderShadowMap())
 		{
 			CVK::State::getInstance()->setCamera(light->getLightCamera());
-			CVK::State::getInstance()->setShader(depthMapShader);
-			depthMapShader->update();
-
+			if (light->getType() == 0) {
+				CVK::State::getInstance()->setShader(depthMapShader);
+				depthMapShader->update();
+			}
+			else {
+				CVK::State::getInstance()->setShader(shadowCubemapShader);
+				shadowCubemapShader->update(light);
+			}
+			
 			scene->render();
 
 			light->finishRenderShadowMap();
@@ -229,7 +277,7 @@ int main()
 	glfwMakeContextCurrent(window);
 	glfwSetCharCallback(window, charCallback);
 	glfwSetWindowSizeCallback(window, resizeCallback);
-	glfwSwapInterval(1); // vsync
+	glfwSwapInterval(0); // vsync
 	glewInit();
 
 	glEnable(GL_DEPTH_TEST);
@@ -239,6 +287,9 @@ int main()
 	// Load, compile and link Shader
 	const char *depthShadernames[2] = { SHADERS_PATH "/PBR/depthMap.vert", SHADERS_PATH "/PBR/depthMap.frag" };
 	depthMapShader = new CVK::ShaderMinimal(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, depthShadernames);
+
+	const char *cubeShadowsShadernames[3] = { SHADERS_PATH "/PBR/shadowCube.vert", SHADERS_PATH "/PBR/shadowCube.geom", SHADERS_PATH "/PBR/shadowCube.frag" };
+	shadowCubemapShader = new CVK::ShaderShadowCubemap(VERTEX_SHADER_BIT | GEOMETRY_SHADER_BIT | FRAGMENT_SHADER_BIT, cubeShadowsShadernames);
 
 	const char *shadernames[2] = { SHADERS_PATH "/PBR/PBRsimple.vert", SHADERS_PATH "/PBR/PBRsimple.frag" };
 	CVK::ShaderPBRsimple pbrShaderSimple(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
@@ -267,17 +318,42 @@ int main()
 		double deltaTime = glfwGetTime() - time;
 		time = glfwGetTime();
 
-		// light rotations
+		// light rotations and update cameras
 		CVK::Light *light = nullptr;
-		for (int i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
+		for (size_t i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
 			light = &CVK::State::getInstance()->getLights()->at(i);
-			glm::vec4 lightPos = *(light->getPosition());
-			lightPos = glm::rotate(glm::mat4(1.0f), glm::radians(20.0f * (float)deltaTime), glm::vec3(0.0f, 1.0f, 0.0f)) * lightPos;
-			light->setPosition(lightPos);
+			if (activeScene != 2) {
+				glm::vec4 lightPos = *(light->getPosition());
+				lightPos = glm::rotate(glm::mat4(1.0f), glm::radians(20.0f * (float)deltaTime), glm::vec3(0.0f, 1.0f, 0.0f)) * lightPos;
+				light->setPosition(lightPos);
+			}
 			if (light->castsShadow())
+				light->getLightCamera()->update(deltaTime);
+		}
+
+		// set active lights
+		if (activeScene != lastScene) {
+			if (activeScene == 2)
 			{
-				light->getLightCamera()->update(deltaTime);
-				light->getLightCamera()->update(deltaTime);
+				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
+				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
+				CVK::State::getInstance()->getLights()->at(2).setColor(glm::vec3(20.0f, 15.0f, 15.0f));
+			}
+			else {
+				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
+				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
+				CVK::State::getInstance()->getLights()->at(2).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
+			}
+			lastScene = activeScene;
+		}
+
+		// rotate spheres in scene 2
+		if (activeScene == 2)
+		{
+			std::vector<CVK::Node*> *nodes = scene_node3->getChildren();
+			for (int i = 0; i < nodes->size(); i++) {
+				if (*(*nodes)[i]->getName() == "Group")
+					(*nodes)[i]->setModelMatrix(glm::rotate(*(*nodes)[i]->getModelMatrix(), glm::radians(20.0f * (float)deltaTime), glm::vec3(0.0f, 1.0f, 0.0f)));
 			}
 		}
 
@@ -294,7 +370,6 @@ int main()
 			activeScene = 0;
 		if (displayMode < 0 || displayMode > 5)
 			displayMode = 0;
-
 
 		switch (activeScene)
 		{

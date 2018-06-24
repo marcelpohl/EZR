@@ -31,10 +31,11 @@ uniform sampler2D u_AOMap;
 // lights and light properties
 struct LIGHT {
 	vec3 position;
-	bool directional;
+	int type;
 	vec3 color;
 	bool castShadow;
 	mat4 lightMatrix;
+	float farPlane;
 };
 
 layout(std430, binding = 0) readonly buffer lights_ssbo
@@ -59,6 +60,15 @@ struct GeometricAttributes
 
 GeometricAttributes geo_Attributes;
 
+// offset directions for sampling cube shadows
+vec3 gridSampling[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
 
 vec3 GetDiffuse()
 {
@@ -147,11 +157,30 @@ float ShadowCalculation(int i, vec4 fragPosLightSpace)
 	
 	if (shadowCoord.z > 1.0)
 		shadow = 0.0;
-	
+
 	return 1.0 - shadow;
 
 }
 
+float PointShadowCalculation(int i, LIGHT light)
+{
+	samplerCube shadowMap = samplerCube(shadowMapHandle[i]);
+
+    vec3 fragToLight = geo_Attributes.pos - light.position;
+	float currentDepth = length(fragToLight);
+	
+	float shadow = 0.0;
+    int samples = 20;
+    for(int i = 0; i < samples; ++i)
+    {
+        float closestDepth = texture(shadowMap, fragToLight + gridSampling[i] * 0.05).r * light.farPlane;
+        if(currentDepth - 0.15 > closestDepth)
+            shadow += 1.0;
+    }
+    shadow /= float(samples);
+	
+	return 1.0 - shadow;
+} 
 
 
 void main()
@@ -232,8 +261,12 @@ void main()
 		float shadow = 1.0;
 		if (light.castShadow)
 		{
-			vec4 shadowCoord = light.lightMatrix * fs_in.position;
-			shadow = ShadowCalculation(i, shadowCoord);
+			if (light.type == 0) {
+				vec4 shadowCoord = light.lightMatrix * fs_in.position;
+				shadow = ShadowCalculation(i, shadowCoord);
+			} else {
+				shadow = PointShadowCalculation(i, light);
+			}
 		}
 		
         // add to outgoing radiance Lo

@@ -1,5 +1,5 @@
-#ifndef __CVK_SHADER_PBR_H
-#define __CVK_SHADER_PBR_H
+#ifndef __CVK_SHADER_SHADOW_CUBEMAP_H
+#define __CVK_SHADER_SHADOW_CUBEMAP_H
 
 #include "CVK_Defs.h"
 #include "CVK_Camera.h"
@@ -17,7 +17,7 @@ namespace CVK
 * @brief PBR shader that sets light and fog informations
 * @see State
 */
-class ShaderPBR : public CVK::ShaderMinimal
+class ShaderShadowCubemap : public CVK::ShaderMinimal
 {
 public:
 	/**
@@ -26,7 +26,7 @@ public:
 	* @param shader_mask Describes which shader files are used
 	* @param shaderPaths Array of paths to shader files
 	*/
-	ShaderPBR( GLuint shader_mask, const char** shaderPaths);
+	ShaderShadowCubemap( GLuint shader_mask, const char** shaderPaths);
 
 	/**
 	* Sets scene dependent variables in Shader. Namely light and fog informations set in State.
@@ -34,7 +34,7 @@ public:
 	* @see State
 	* @see Light
 	*/
-	void update() override;
+	void update(CVK::Light *light);
 	/**
 	* Sets node dependent variables in Shader, like Material information.
 	* @brief Sets node variables
@@ -42,41 +42,11 @@ public:
 	*/
 	void update( CVK::Node* node) override;
 
-	void setDisplayMode(int mode);
-
 private:
-
-	struct lightSSBO {
-		glm::vec3 position;
-		int type;
-		glm::vec3 color;
-		bool castShadow;
-		glm::mat4 lightMatrix;
-		float farPlane;
-		float p2;
-		float p3;
-		float p4;
-	};
-
-	GLuint m_lightSSBOID;
-	std::vector<lightSSBO> m_lightSSBO;
-
-	GLuint m_shadowMapSSBOID;
-	std::vector<GLuint64> m_shadowMapSSBO;
-
-	GLuint m_camPosID;
-
-	GLuint m_diffuseMapID, m_normalMapID;
-	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
-
-	int m_displayMode;
-	GLuint m_displayModeID;
-
-	glm::mat4 m_lightViewportMatrix;
-
-	void updateLights();
+	GLuint m_shadowMatricesID[6];
+	GLuint m_lightPosID, m_farPlaneID;
 };
 
 }
 
-#endif /* __CVK_SHADER_PHONG_H */
+#endif /* __CVK_SHADER_SHADOW_CUBEMAP_H */

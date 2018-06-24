@@ -20,3 +20,8 @@ float CVK::Projection::getNear() const
 {
 	return m_znear;
 }
+
+float CVK::Projection::getFar() const
+{
+	return m_zfar;
+}

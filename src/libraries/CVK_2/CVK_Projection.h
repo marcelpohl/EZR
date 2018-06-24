@@ -34,6 +34,7 @@ namespace CVK
 		 * @return The near value of this object
 		 */
 		float getNear() const;
+		float getFar() const;
 		/**
 		 * Updates the Ratio of the projection matrix. Dependant on subclass implementation and therefore abstract
 		 * @brief Update needs implementation in subclass

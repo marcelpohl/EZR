@@ -46,7 +46,7 @@ public:
 	* @param depthTexture Declares if the FBO has a depth texture for depth comparison
 	* @param stencilTexture Declares if the FBO has a stencil texture for stencil comparison
 	*/
-	FBO(int width, int height, int numColorTextures = 1, bool depthTexture = false, bool stencilTexture = false);
+	FBO(int width, int height, int numColorTextures = 1, bool depthTexture = false, bool stencilTexture = false, bool cubeMapTexture = false);
 	/**
 	 * Standard Destructor for FBO
 	 */
@@ -62,7 +62,7 @@ public:
 	 * @param depthTexture Declares if the FBO has a depth texture for depth comparison
 	 * @param stencilTexture Declares if the FBO has a stencil texture for stencil comparison
 	 */
-	void create(int width, int height, int numColorTextures, bool depthTexture, bool stencilTexture);
+	void create(int width, int height, int numColorTextures, bool depthTexture, bool stencilTexture, bool cubeMapTexture);
 	/**
 	 * Resets FBO and all corresponding textures and sets them to the invalid value
 	 * @brief Resets FBO and all textures
@@ -98,14 +98,16 @@ public:
 	 * @return the depth texture object of this FBO
 	 */
 	GLuint getDepthTexture() const;
+	GLuint getDepthCubemapTexture() const;
 
 private:
-	GLuint createTexture() const;
+	GLuint createTexture(bool isCubeMap = false) const;
 
 	int m_width, m_height; //!< the size of each texture object 
 	std::vector<GLuint> m_colorTextures; //!< List containing all OpenGL color textures 
 	GLuint m_depthTexture, m_stencilTexture; 
 	GLuint m_frameBufferHandle; //!< The actual OpenGL FBO id 
+	GLuint m_depthCubeMapTexture;
 };
 
 }

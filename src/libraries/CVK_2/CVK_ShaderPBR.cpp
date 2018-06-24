@@ -31,11 +31,9 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths) : CVK::S
 
 void CVK::ShaderPBR::update()
 {
-
 	CVK::ShaderMinimal::update();
 
 	updateLights();
-
 
 	glm::vec3 camPos = CVK::State::getInstance()->getCamera()->getPosition();
 	glUniform3fv(m_camPosID, 1, glm::value_ptr(camPos));
@@ -114,17 +112,19 @@ void CVK::ShaderPBR::updateLights()
 	{
 		CVK::Light *light = &CVK::State::getInstance()->getLights()->at(i);
 		m_lightSSBO[i].position = glm::vec3(*light->getPosition());
+		m_lightSSBO[i].type = light->getType();
 		m_lightSSBO[i].color = *light->getColor();
 		m_lightSSBO[i].castShadow = light->castsShadow();
-		m_lightSSBO[i].directional = light->isDirectional();
-		m_lightSSBO[i].lightMatrix = m_lightViewportMatrix * *light->getLightVPMatrix();
+		if (m_lightSSBO[i].castShadow == true)
+		{
+			m_lightSSBO[i].lightMatrix = m_lightViewportMatrix * *light->getLightVPMatrix();
+			m_lightSSBO[i].farPlane = light->getLightCamera()->getProjection()->getFar();
+		}
 	}
 	
 
 	if (m_shadowMapSSBOID == GL_INVALID_VALUE)
 	{
-		//m_shadowMapHandle = glGetTextureHandleARB(m_textures[0]);
-		//glMakeTextureHandleResidentARB(m_shadowMapHandle);
 		for (int i = 0; i < numLights; i++)
 		{
 			GLuint64 shadowMapHandle = 0;

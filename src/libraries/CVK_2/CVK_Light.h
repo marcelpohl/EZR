@@ -97,8 +97,12 @@ public:
 	void setCastShadow(bool b, GLFWwindow* window);
 	bool castsShadow();
 
-	void setDirectional(bool b);
-	bool isDirectional();
+	/**
+	* @brief Sets light type. 
+	* @param type 0 = directional, 1 = point
+	*/
+	void setType(int type);
+	int getType();
 
 	glm::mat4* getLightVPMatrix();
 
@@ -120,7 +124,7 @@ private:
 	glm::mat4 m_lightVPMatrix = glm::mat4(1.0f);
 
 	bool m_castShadow = false;
-	bool m_isDirectional = false;
+	int m_lightType;	//!< 0 = directional, 1 = point
 
 	int m_shadowWidth = 1024;
 	int m_shadowHeight = 1024;

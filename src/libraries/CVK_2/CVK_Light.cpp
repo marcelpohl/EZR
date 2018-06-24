@@ -88,7 +88,17 @@ void CVK::Light::setCastShadow(bool b, GLFWwindow* window)
 	if (m_castShadow == true)
 	{
 		if (m_shadowMapFBO == nullptr)
-			m_shadowMapFBO = new CVK::FBO(m_shadowWidth, m_shadowHeight, 0, true);
+		{
+			switch (m_lightType)
+			{
+			case 0:
+				m_shadowMapFBO = new CVK::FBO(m_shadowWidth, m_shadowHeight, 0, true);
+				break;
+			case 1:
+				m_shadowMapFBO = new CVK::FBO(m_shadowWidth, m_shadowHeight, 0, false, false, true);
+				break;
+			}
+		}
 
 		if (m_lightCamera == nullptr)
 		{
@@ -100,6 +110,7 @@ void CVK::Light::setCastShadow(bool b, GLFWwindow* window)
 			m_lightCamera->setLookAt(lightPos, &m_spotDirection);
 		}
 	}
+
 }
 
 bool CVK::Light::castsShadow()
@@ -107,14 +118,33 @@ bool CVK::Light::castsShadow()
 	return m_castShadow;
 }
 
-void CVK::Light::setDirectional(bool b)
+void CVK::Light::setType(int type)
 {
-	m_isDirectional = b;
+	if (type != 0 && type != 1)
+		return;
+
+	m_lightType = type;
+
+	if (m_castShadow)
+	{
+		if (m_shadowMapFBO != nullptr)
+			delete m_shadowMapFBO;
+
+		switch (m_lightType)
+		{
+		case 0:
+			m_shadowMapFBO = new CVK::FBO(m_shadowWidth, m_shadowHeight, 0, true);
+			break;
+		case 1:
+			m_shadowMapFBO = new CVK::FBO(m_shadowWidth, m_shadowHeight, 0, false, false, true);
+			break;
+		}
+	}
 }
 
-bool CVK::Light::isDirectional()
+int CVK::Light::getType()
 {
-	return m_isDirectional;
+	return m_lightType;
 }
 
 
@@ -153,5 +183,8 @@ void CVK::Light::finishRenderShadowMap()
 
 GLuint CVK::Light::getShadowMap()
 {
-	return m_shadowMapFBO->getDepthTexture();
+	if (m_lightType == 0)
+		return m_shadowMapFBO->getDepthTexture();
+	else
+		return m_shadowMapFBO->getDepthCubemapTexture();
 }
