@@ -72,12 +72,12 @@ void init_lights()
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}*/
-	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(20.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(20.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);

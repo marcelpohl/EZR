@@ -52,10 +52,12 @@ private:
 		glm::vec3 color;
 		bool castShadow;
 		glm::mat4 lightMatrix;
+		glm::vec3 direction;
+		float spotExponent;
+		float spotCutoff;
 		float farPlane;
+		float p1;
 		float p2;
-		float p3;
-		float p4;
 	};
 
 	GLuint m_lightSSBOID;
@@ -65,6 +67,7 @@ private:
 	std::vector<GLuint64> m_shadowMapSSBO;
 
 	GLuint m_camPosID;
+	GLuint m_ambientLightID;
 
 	GLuint m_diffuseMapID, m_normalMapID;
 	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;

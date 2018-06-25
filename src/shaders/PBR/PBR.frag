@@ -35,6 +35,9 @@ struct LIGHT {
 	vec3 color;
 	bool castShadow;
 	mat4 lightMatrix;
+	vec3 lookAt; 
+    float spotExponent; 
+    float spotCutoff;
 	float farPlane;
 };
 
@@ -228,6 +231,8 @@ void main()
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, diffuse, metallic);
 
+	FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+	
     // reflectance equation
     vec3 Lo = vec3(0.0);
     for(int i = 0; i < lights.length(); ++i) 
@@ -258,6 +263,7 @@ void main()
         // scale light by NdotL
         float NdotL = max(dot(normal, lightVec), 0.0);        
 		
+		// shadow
 		float shadow = 1.0;
 		if (light.castShadow)
 		{
@@ -269,8 +275,25 @@ void main()
 			}
 		}
 		
+		// spotlight
+		float spot = 1.0f;
+		if (light.spotCutoff >= 0.001f) {
+			
+			//float lightToSurfaceAngle = degrees(acos(dot(-lightVec, normalize(light.coneDirection))));
+			vec3 coneDirection = normalize(light.lookAt - 	light.position );
+			float lightToSurfaceAngle = acos(dot(-lightVec, coneDirection));
+			if(lightToSurfaceAngle > light.spotCutoff) {
+				spot = 0.0;
+			}
+			
+			//vec3 spotDirection = mat3(light.lightMatrix) * normalize(light.position - light.lookAt);
+			//float cos_phi_spot = max(dot(-lightVec, spotDirection), 0.0f);
+			//bool inRange = cos_phi_spot >= cos(light.spotCutoff);
+			//spot = inRange ? pow(cos_phi_spot, light.spotExponent) : 0.0f;
+		}
+		
         // add to outgoing radiance Lo
-        Lo += shadow * (kD * diffuse / PI + specular) * radiance * NdotL;
+        Lo += shadow * spot * (kD * diffuse / PI + specular) * radiance * NdotL;
 
     }   
     

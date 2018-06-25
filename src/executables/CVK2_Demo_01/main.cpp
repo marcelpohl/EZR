@@ -94,7 +94,7 @@ void init_lights()
 	//define Light Sources
 	plight = new CVK::Light( glm::vec4( -1, 1, 1, 1), GREY, glm::vec3( 0, 0, 0), 1.0f, 0.0f);
 	dlight = new CVK::Light( glm::vec4( -1, 1, 1, 0), GREY, glm::vec3( 0, 0, 0), 1.0f, 0.0f);
-	slight = new CVK::Light( glm::vec4( -1, 1, -1, 1), DARKGREY, glm::vec3(-1, -1, -1), 5.0f, glm::radians( 35.0f));
+	slight = new CVK::Light( glm::vec4( -1, 1, -1, 1), DARKGREY, glm::vec3(-1, -1, -1), 5.0f, glm::radians(35.0f));
 	CVK::State::getInstance()->addLight( plight);
 	CVK::State::getInstance()->updateSceneSettings( DARKGREY, FOG_LINEAR, WHITE, 1, 10, 1);
 }

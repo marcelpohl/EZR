@@ -115,6 +115,9 @@ void CVK::ShaderPBR::updateLights()
 		m_lightSSBO[i].type = light->getType();
 		m_lightSSBO[i].color = *light->getColor();
 		m_lightSSBO[i].castShadow = light->castsShadow();
+		m_lightSSBO[i].direction = *light->getSpotDirection();
+		m_lightSSBO[i].spotExponent = light->getSpotExponent();
+		m_lightSSBO[i].spotCutoff = light->getSpotCutoff();
 		if (m_lightSSBO[i].castShadow == true)
 		{
 			m_lightSSBO[i].lightMatrix = m_lightViewportMatrix * *light->getLightVPMatrix();
