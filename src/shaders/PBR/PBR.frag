@@ -278,18 +278,19 @@ void main()
 		// spotlight
 		float spot = 1.0f;
 		if (light.spotCutoff >= 0.001f) {
-			
-			//float lightToSurfaceAngle = degrees(acos(dot(-lightVec, normalize(light.coneDirection))));
-			vec3 coneDirection = normalize(light.lookAt - 	light.position );
+			float innerCutoff = light.spotCutoff - 0.2;
+			float outerCutoff = light.spotCutoff + 0.2;
+			float epsilon = outerCutoff - innerCutoff;
+			vec3 coneDirection = normalize(light.lookAt - light.position );
 			float lightToSurfaceAngle = acos(dot(-lightVec, coneDirection));
-			if(lightToSurfaceAngle > light.spotCutoff) {
-				spot = 0.0;
-			}
+			spot = 1.0 - clamp(((lightToSurfaceAngle - innerCutoff) / epsilon), 0.0, 1.0);
 			
-			//vec3 spotDirection = mat3(light.lightMatrix) * normalize(light.position - light.lookAt);
-			//float cos_phi_spot = max(dot(-lightVec, spotDirection), 0.0f);
-			//bool inRange = cos_phi_spot >= cos(light.spotCutoff);
-			//spot = inRange ? pow(cos_phi_spot, light.spotExponent) : 0.0f;
+			
+			
+			//if(lightToSurfaceAngle > light.spotCutoff) {
+			//	spot = 0.0;
+			//}
+
 		}
 		
         // add to outgoing radiance Lo

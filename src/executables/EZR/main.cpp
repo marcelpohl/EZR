@@ -72,15 +72,15 @@ void init_lights()
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}*/
-	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(20.0f));
+	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(20.0f));
-	plight->setType(0);
-	plight->setCastShadow(true, window);
-	CVK::State::getInstance()->addLight(plight);
+	//plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
+	//plight->setType(0);
+	//plight->setCastShadow(true, window);
+	//CVK::State::getInstance()->addLight(plight);
 
 	plight = new CVK::Light(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 	plight->setType(1);
@@ -148,7 +148,7 @@ void init_scene()
 
 	sphere_node2 = new CVK::Node(std::string("Plane"), std::string(RESOURCES_PATH "/meshes/plane.obj"), false);
 	sphere_node2->setModelMatrix(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -1.1f, 0.0f)));
-	sphere_node2->setMaterial(pbr_mat1);
+	sphere_node2->setMaterial(pbr_mat4);
 	scene_node2->addChild(sphere_node2);
 
 
@@ -336,13 +336,13 @@ int main()
 			if (activeScene == 2)
 			{
 				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
-				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
-				CVK::State::getInstance()->getLights()->at(2).setColor(glm::vec3(20.0f, 15.0f, 15.0f));
+				//CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
+				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(20.0f, 15.0f, 15.0f));
 			}
 			else {
 				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
-				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
-				CVK::State::getInstance()->getLights()->at(2).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
+				//CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
+				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
 			}
 			lastScene = activeScene;
 		}
