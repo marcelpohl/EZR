@@ -73,6 +73,8 @@ private:
 	GLuint m_diffuseMapID, m_normalMapID;
 	GLuint m_metallicMapID, m_roughnessMapID, m_aoMapID;
 	GLuint m_irradianceMapID;
+	GLuint m_preFilteredMapID;
+	GLuint m_LUTBRDFMapID;
 
 	int m_displayMode;
 	GLuint m_displayModeID;

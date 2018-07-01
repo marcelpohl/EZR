@@ -16,6 +16,8 @@ CVK::ShaderPBR::ShaderPBR(GLuint shader_mask, const char** shaderPaths, CVK::Env
 	m_roughnessMapID = glGetUniformLocation(m_ProgramID, "u_RoughnessMap");
 	m_aoMapID = glGetUniformLocation(m_ProgramID, "u_AOMap");
 	m_irradianceMapID = glGetUniformLocation(m_ProgramID, "u_Irradiance");
+	m_preFilteredMapID = glGetUniformLocation(m_ProgramID, "u_preFiltered");
+	m_LUTBRDFMapID = glGetUniformLocation(m_ProgramID, "u_LUTBRDF");
 
 	// light uniforms
 	m_lightSSBOID = GL_INVALID_VALUE;
@@ -91,6 +93,14 @@ void CVK::ShaderPBR::update(CVK::Node* node)
 		glUniform1i(m_irradianceMapID, 7);
 		glActiveTexture(GL_TEXTURE7);
 		m_environement->getIrradianceMap()->bind();
+
+		glUniform1i(m_preFilteredMapID, 8);
+		glActiveTexture(GL_TEXTURE8);
+		m_environement->getPreFilteredEnvironmentMap()->bind();
+
+		glUniform1i(m_LUTBRDFMapID, 9);
+		glActiveTexture(GL_TEXTURE9);
+		m_environement->getLUTBRDFMap()->bind();
 	}
 }
 

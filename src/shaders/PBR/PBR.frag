@@ -28,6 +28,8 @@ uniform sampler2D u_MetallicMap;
 uniform sampler2D u_RoughnessMap;
 uniform sampler2D u_AOMap;
 uniform samplerCube u_Irradiance;
+uniform samplerCube u_preFiltered;
+uniform sampler2D u_LUTBRDF;
 
 // lights and light properties
 struct LIGHT {
@@ -187,6 +189,12 @@ float PointShadowCalculation(int i, LIGHT light)
 } 
 
 
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}  
+
+
 void main()
 {
 	geo_Attributes.pos = fs_in.position.xyz;
@@ -226,6 +234,7 @@ void main()
 	
 	vec3 normal  = GetNormal();
 	vec3 viewVec = normalize(fs_in.cameraPos - geo_Attributes.pos);
+	vec3 refVec = reflect(-viewVec, normal);
 	
 	// calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
     // of 0.04 and if it's a metal, use the diffuse color as F0 (metallic workflow)    
@@ -300,12 +309,21 @@ void main()
     }   
     
     // ambient lighting (we now use IBL as the ambient term)
-    vec3 kS = fresnelSchlick(max(dot(normal, viewVec), 0.0), F0);
+	vec3 F = fresnelSchlickRoughness(max(dot(normal, viewVec), 0.0), F0, roughness);;
+
+    vec3 kS = F;
     vec3 kD = 1.0 - kS;
     kD *= 1.0 - metallic;	  
     vec3 irradiance = texture(u_Irradiance, normal).rgb;
     vec3 d      = irradiance * diffuse;
-    vec3 ambient = (kD * d) * ao;
+
+    // sample both the pre-filter map and the BRDF lut and combine them together as per the Split-Sum approximation to get the IBL specular part.
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(u_preFiltered, refVec,  roughness * MAX_REFLECTION_LOD).rgb;    
+    vec2 brdf  = texture(u_LUTBRDF, vec2(max(dot(normal, viewVec), 0.0), roughness)).rg;
+    vec3 s = prefilteredColor * (F * brdf.x + brdf.y);
+
+    vec3 ambient = (kD * d + s) * ao;
     
     vec3 color = ambient + Lo;
 
