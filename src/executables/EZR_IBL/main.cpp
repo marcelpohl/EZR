@@ -31,7 +31,7 @@ CVK::Material *pbr_mat4 = nullptr;
 CVK::ShaderMinimal *depthMapShader;
 CVK::ShaderShadowCubemap *shadowCubemapShader;
 
-// ImGui
+// ImGui 
 float metallic = 1.0f;
 float roughness = 0.2f;
 float ao = 0.0f;
