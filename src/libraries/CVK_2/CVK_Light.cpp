@@ -102,7 +102,7 @@ void CVK::Light::setCastShadow(bool b, GLFWwindow* window)
 
 		if (m_lightCamera == nullptr)
 		{
-			m_projection = new CVK::Perspective(glm::radians(90.0f), m_shadowWidth / (float)m_shadowHeight, 0.1f, 500.f);
+			m_projection = new CVK::Perspective(glm::radians(90.0f), m_shadowWidth / (float)m_shadowHeight, 0.1f, 50.f);
 			m_lightCamera = new CVK::CameraSimple(window, m_shadowWidth, m_shadowHeight, m_projection);
 
 			glm::vec3 *lightPos = new glm::vec3(m_position);

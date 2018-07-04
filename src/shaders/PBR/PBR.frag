@@ -294,13 +294,6 @@ void main()
 			vec3 coneDirection = normalize(light.lookAt - light.position );
 			float lightToSurfaceAngle = acos(dot(-lightVec, coneDirection));
 			spot = 1.0 - clamp(((lightToSurfaceAngle - innerCutoff) / epsilon), 0.0, 1.0);
-			
-			
-			
-			//if(lightToSurfaceAngle > light.spotCutoff) {
-			//	spot = 0.0;
-			//}
-
 		}
 		
         // add to outgoing radiance Lo
