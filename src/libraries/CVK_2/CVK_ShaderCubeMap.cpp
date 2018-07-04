@@ -29,7 +29,7 @@ CVK::ShaderCubeMap::ShaderCubeMap(GLuint shader_mask, const char** shaderPaths, 
 CVK::ShaderCubeMap::~ShaderCubeMap()
 {
 	if (m_cubeMap != nullptr)
-		delete[] m_cubeMap;
+		delete m_cubeMap;
 }
 
 void CVK::ShaderCubeMap::render()
