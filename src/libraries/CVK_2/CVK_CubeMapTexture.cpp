@@ -9,7 +9,8 @@ CVK::CubeMapTexture::CubeMapTexture(const std::vector<std::string>& fileNames)
 	m_textureID = INVALID_GL_VALUE;
 
 	createCubeMapTexture();
-	load(fileNames);
+	if (fileNames.size() > 0)
+		load(fileNames);
 }
 
 CVK::CubeMapTexture::CubeMapTexture( GLuint texture)

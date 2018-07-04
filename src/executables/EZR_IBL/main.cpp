@@ -72,7 +72,7 @@ void init_lights()
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}*/
-	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
+	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
@@ -103,7 +103,11 @@ void init_camera()
 
 void init_materials()
 {
-	pbr_mat_simple = new CVK::Material(glm::vec3(0.5f, 0.0f, 0.0f), metallic, roughness, ao);
+	pbr_mat_simple = new CVK::Material(RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_basecolor-boosted.png",
+									   RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_normal.png",
+		                               RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_metallic.png",
+		                               RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_roughness.png",
+		                               RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_ao.png");
 	pbr_mat1 = new CVK::Material(RESOURCES_PATH "/textures/darkTiles/darktiles1_basecolor.png",
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_normal-OGL.png",
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_metallic.png",
@@ -129,7 +133,7 @@ void init_materials()
 void init_scene()
 {
 	/****************************
-	* Scene 1 - simple Shader
+	* Scene 1 - IBL
 	*****************************/
 	scene_node = new CVK::Node("Scene");
 	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
@@ -285,6 +289,28 @@ int main()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS); // Bessere CubeMaps
 
+	std::vector<std::string> cubeMapImages;
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posx.jpg"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negx.jpg"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posy.jpg"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negy.jpg"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posz.jpg"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negz.jpg"));	
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/white.png"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/green.png"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/red.png"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/white.png"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/white.png"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/white.png"));
+
+	CVK::CubeMapTexture* cubeMap = new CVK::CubeMapTexture(cubeMapImages);
+	CVK::Environment* environment = new CVK::Environment(cubeMap, 32u, 512u, 5u, 1024u);
+	environment->computeMaps();
+
+	// Skybox
+	const char *skyBoxShadernames[2] = { SHADERS_PATH "/PBR/Skybox.vert", SHADERS_PATH "/PBR/Skybox.frag" };
+	CVK::ShaderCubeMap skyBoxShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, skyBoxShadernames, cubeMap);
+
 	// Load, compile and link Shader
 	const char *depthShadernames[2] = { SHADERS_PATH "/PBR/depthMap.vert", SHADERS_PATH "/PBR/depthMap.frag" };
 	depthMapShader = new CVK::ShaderMinimal(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, depthShadernames);
@@ -292,12 +318,13 @@ int main()
 	const char *cubeShadowsShadernames[3] = { SHADERS_PATH "/PBR/shadowCube.vert", SHADERS_PATH "/PBR/shadowCube.geom", SHADERS_PATH "/PBR/shadowCube.frag" };
 	shadowCubemapShader = new CVK::ShaderShadowCubemap(VERTEX_SHADER_BIT | GEOMETRY_SHADER_BIT | FRAGMENT_SHADER_BIT, cubeShadowsShadernames);
 
-	const char *shadernames[2] = { SHADERS_PATH "/PBR/PBRsimple.vert", SHADERS_PATH "/PBR/PBRsimple.frag" };
-	CVK::ShaderPBRsimple pbrShaderSimple(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
+	//const char *shadernames[2] = { SHADERS_PATH "/PBR/PBRsimple.vert", SHADERS_PATH "/PBR/PBRsimple.frag" };
+	//CVK::ShaderPBRsimple pbrShaderSimple(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames);
 	const char *shadernames2[2] = { SHADERS_PATH "/PBR/PBR.vert", SHADERS_PATH "/PBR/PBR.frag" };
-	CVK::ShaderPBR pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames2);
+	CVK::ShaderPBR pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames2, environment);
 
-	CVK::State::getInstance()->setShader(&pbrShaderSimple);
+	//CVK::State::getInstance()->setShader(&pbrShaderSimple);
+	CVK::State::getInstance()->setShader(&pbrShader);
 
 
 	init_lights();
@@ -341,7 +368,7 @@ int main()
 				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(20.0f, 15.0f, 15.0f));
 			}
 			else {
-				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
+				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(50.0f, 50.0f, 50.0f));
 				//CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
 				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
 			}
@@ -375,11 +402,18 @@ int main()
 		switch (activeScene)
 		{
 		case 0:
-			render_scene(scene_node, &pbrShaderSimple);
+			pbrShader.setDisplayMode(displayMode);
+			render_scene(scene_node, &pbrShader);
+
+			skyBoxShader.update();
+			skyBoxShader.render();
 			break;
 		case 1:
 			pbrShader.setDisplayMode(displayMode);
 			render_scene(scene_node2, &pbrShader);
+
+			skyBoxShader.update();
+			skyBoxShader.render();
 			break;
 		case 2:
 			pbrShader.setDisplayMode(displayMode);
@@ -390,7 +424,7 @@ int main()
 			render_scene(scene_node4, &pbrShader);
 			break;
 		default:
-			render_scene(scene_node, &pbrShaderSimple);
+			render_scene(scene_node, &pbrShader);
 			break;
 		}
 
