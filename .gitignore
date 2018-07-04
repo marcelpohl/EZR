@@ -36,3 +36,4 @@
 *~
 *.bak
 CMakeLists.txt.user
+Win32/Debug/ZERO_CHECK/ZERO_CHECK.log
