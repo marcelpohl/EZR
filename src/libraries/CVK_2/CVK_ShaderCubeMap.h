@@ -10,6 +10,9 @@ public:
 	ShaderCubeMap(GLuint shader_mask, const char** shaderPaths, CVK::CubeMapTexture* cubeMap);
 	~ShaderCubeMap();
 
+	CVK::CubeMapTexture* getCubeMap();
+	void setCubeMap(CVK::CubeMapTexture* cubeMap);
+
 	virtual void update();
 	virtual void render();
 

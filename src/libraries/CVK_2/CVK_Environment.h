@@ -13,6 +13,8 @@ namespace CVK
 class Environment
 {
 public:
+	typedef void(*RenderFunction)(CVK::Node*, CVK::ShaderMinimal*, CVK::ShaderCubeMap*, CVK::Camera*, unsigned int width, unsigned int height);
+
 	Environment(CVK::CubeMapTexture* enviromentMap, unsigned int irrMapSize, unsigned int preFilMapSize, unsigned int preFilLevel, unsigned int m_LUTBRDFMapSize);
 	Environment(glm::vec3 color, unsigned int irrMapSize, unsigned int preFilMapSize, unsigned int preFilLevel, unsigned int m_LUTBRDFMapSize);
 
@@ -33,7 +35,7 @@ public:
 	void setEnviroment(CVK::CubeMapTexture* enviromentMap);
 	void setUniformEnviroment(glm::vec3 color);
 	// Ein ich hätte das lieber über eine Funktionszeiger geregelt aber da alle nötigen Variablen im Rahmen der main-funktion bestehen ist der transfer aufwand so geringer auch wenn das ganze dann nicht ganz fexibel ist.
-	void renderSceneToEnvironmentMap(CVK::Node &scene, CVK::ShaderMinimal &shader, CVK::ShaderCubeMap &skyBox, unsigned int passes, unsigned int resolution, glm::vec3 worldPos);
+	void renderSceneToEnvironmentMap(RenderFunction function, CVK::Node &scene, CVK::ShaderMinimal &shader, CVK::ShaderCubeMap &skyBox, unsigned int resolution, glm::vec3 worldPos);
 
 	CVK::CubeMapTexture* getEnvironmentMap();
 
@@ -63,6 +65,7 @@ private:
 	void computePreFilteredEnvironmentMap();
 	void computeLUTBRDFMap();
 
+	// --- Felder ---
 	CVK::FBO* m_preComputeFBO;
 
 	// --- Environment ---

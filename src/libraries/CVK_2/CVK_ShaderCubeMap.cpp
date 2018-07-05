@@ -32,6 +32,19 @@ CVK::ShaderCubeMap::~ShaderCubeMap()
 		delete m_cubeMap;
 }
 
+CVK::CubeMapTexture* CVK::ShaderCubeMap::getCubeMap()
+{
+	return m_cubeMap;
+}
+
+void CVK::ShaderCubeMap::setCubeMap(CVK::CubeMapTexture* cubeMap)
+{
+	if (m_cubeMap != nullptr)
+		delete m_cubeMap;
+
+	m_cubeMap = cubeMap;
+}
+
 void CVK::ShaderCubeMap::render()
 {
 	glDepthFunc(GL_LEQUAL);

@@ -72,11 +72,8 @@ void CVK::Environment::setUniformEnviroment(glm::vec3 color)
 	m_enviromentMap = nullptr;
 }
 
-void CVK::Environment::renderSceneToEnvironmentMap(CVK::Node& scene, CVK::ShaderMinimal& shader, CVK::ShaderCubeMap& skyBox, unsigned int passes, unsigned int resolution, glm::vec3 worldPos)
+void CVK::Environment::renderSceneToEnvironmentMap(RenderFunction function, CVK::Node& scene, CVK::ShaderMinimal& shader, CVK::ShaderCubeMap& skyBox, unsigned int resolution, glm::vec3 worldPos)
 {
-	// EnvironmentMap anlegen
-	createCubeMapTextureBuffer(resolution, resolution, &m_enviromentMap, false);
-
 	// Werte des alten Viewports speichern
 	GLint viewportData[4];
 	glGetIntegerv(GL_VIEWPORT, &viewportData[0]);
@@ -87,56 +84,78 @@ void CVK::Environment::renderSceneToEnvironmentMap(CVK::Node& scene, CVK::Shader
 	// Framebuffer binden; setzt auch den Viewport
 	m_preComputeFBO->bind();
 
-	// PBR nutzen um uniforms zu finden
-	GLuint pbrViewID = glGetUniformLocation(shader.getProgramID(), "viewMatrix");
-	GLuint pbrProjectionID = glGetUniformLocation(shader.getProgramID(), "projectionMatrix");
-	GLuint pbrCamPos = glGetUniformLocation(shader.getProgramID(), "u_cameraPosition");
+	// ALTES VERFAHREN
+	//// PBR nutzen um uniforms zu finden
+	//GLuint pbrViewID = glGetUniformLocation(shader.getProgramID(), "viewMatrix");
+	//GLuint pbrProjectionID = glGetUniformLocation(shader.getProgramID(), "projectionMatrix");
+	//GLuint pbrCamPos = glGetUniformLocation(shader.getProgramID(), "u_cameraPosition");
 
-	GLuint skyBoxViewID = glGetUniformLocation(skyBox.getProgramID(), "viewMatrix");
-	GLuint skyBoxProjectionID = glGetUniformLocation(skyBox.getProgramID(), "projectionMatrix");
+	//GLuint skyBoxViewID = glGetUniformLocation(skyBox.getProgramID(), "viewMatrix");
+	//GLuint skyBoxProjectionID = glGetUniformLocation(skyBox.getProgramID(), "projectionMatrix");
 
-	// Information für Shader setzen
-	glUniformMatrix4fv(pbrProjectionID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureProjection));
-	glUniform3fv(pbrCamPos, 1, glm::value_ptr(worldPos));
+	//// Information für Shader setzen
+	//glUniformMatrix4fv(pbrProjectionID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureProjection));
+	//glUniform3fv(pbrCamPos, 1, glm::value_ptr(worldPos));
 
 	// Debug Color
 	glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
 
-	for (unsigned int pass = 0; pass < passes; pass++)
+	// Camera Hack
+	CVK::Perspective* perspective = new CVK::Perspective(1.0f);
+	perspective->setProjMatrix(&m_skyboxCaptureProjection);
+	CVK::CameraSimple* camera = new CVK::CameraSimple(nullptr, resolution, resolution);
+	camera->setProjection(perspective);
+	camera->setCamPos(&worldPos);
+
+	//CVK::State::getInstance()->setCamera(camera);
+
+	// EnvironmentMap anlegen
+	CVK::CubeMapTexture* sceneBuffer = nullptr;
+	createCubeMapTextureBuffer(resolution, resolution, &sceneBuffer, false);
+
+	// Die sechs Seiten des Würfeles "Abtasten"
+	for (unsigned int face = 0; face < 6; face++)
 	{
-		// Die sechs Seiten des Würfeles "Abtasten"
-		for (unsigned int face = 0; face < 6; face++)
-		{
-			// Eine Seite der Irradiance Map zum Rendertarget machen
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, m_enviromentMap->getCubeMapTexture(), 0);
+		// Eine Seite der Irradiance Map zum Rendertarget machen
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, sceneBuffer->getCubeMapTexture(), 0);
 
-			// Clear
-			glClear(GL_COLOR_BUFFER_BIT);
+		// Clear
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// View laden
-			//glUniformMatrix4fv(pbrViewID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureViews[face]));
+		// View laden
+		// ALTES VERFAHREN
+		//glUniformMatrix4fv(pbrViewID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureViews[face]));
+		glm::mat4 view = m_skyboxCaptureViews[face];
+		view = glm::translate(view, -worldPos);
+		camera->setView(&view);
 
-			// Szene Rendern
-			CVK::State::getInstance()->setShader(&shader);
-			//shader.update();
-			glUniformMatrix4fv(pbrProjectionID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureProjection));
-			glUniform3fv(pbrCamPos, 1, glm::value_ptr(worldPos));
-			glUniformMatrix4fv(pbrViewID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureViews[face]));
-			//scene.render();
+		function(&scene, &shader, &skyBox, camera, resolution, resolution);
 
-			//skyBox.update();
-			glUniformMatrix4fv(skyBoxProjectionID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureProjection));
-			glUniformMatrix4fv(skyBoxViewID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureViews[face]));
-			skyBox.render();
-		}
+		/*
+		// Szene Rendern
+		CVK::State::getInstance()->setShader(&shader);
+		shader.update();
+		// ALTES VERFAHREN
+		//glUniformMatrix4fv(pbrProjectionID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureProjection));;
+		scene.render();
+
+		skyBox.update();
+		// ALTES VERFAHREN
+		//glUniformMatrix4fv(skyBoxProjectionID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureProjection));
+		//glUniformMatrix4fv(skyBoxViewID, 1, GL_FALSE, glm::value_ptr(m_skyboxCaptureViews[face]));
+		skyBox.render();
+		*/
 	}
+
+	// EnviromentMap neu setzen
+	m_enviromentMap = sceneBuffer;
 
 	// Aufräumen
 	// Standart framebuffer wieder binden
 	m_preComputeFBO->unbind();
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	//Viewport zurück zu standart
+	// Viewport zurück zu standart
 	glViewport(viewportData[0], viewportData[1], viewportData[2], viewportData[3]);
 }
 

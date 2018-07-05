@@ -13,6 +13,7 @@ CVK::Node *scene_node = nullptr;
 CVK::Node *scene_node2 = nullptr;
 CVK::Node *scene_node3 = nullptr;
 CVK::Node *scene_node4 = nullptr;
+CVK::Node *scene_node5 = nullptr;
 
 //define Camera (Trackball)
 int windowWidth = WIDTH;
@@ -21,7 +22,8 @@ CVK::Perspective projection(glm::radians(60.0f), WIDTH / (float)HEIGHT, 0.1f, 50
 CVK::Trackball* cam_trackball;
 
 //define materials
-CVK::Material *pbr_mat_simple = nullptr;
+CVK::Material *pbr_mat_gold = nullptr;
+CVK::Material *pbr_mat_iron = nullptr;
 CVK::Material *pbr_mat1 = nullptr;
 CVK::Material *pbr_mat2 = nullptr;
 CVK::Material *pbr_mat3 = nullptr;
@@ -66,26 +68,27 @@ void resizeCallback(GLFWwindow *window, int w, int h)
 void init_lights()
 {
 	//define Light Sources
-	/*for (int i = -10; i <= 10; i += 20) {
+	for (int i = -10; i <= 10; i += 20) {
 		for (int j = -10; j <= 10; j += 20) {
-			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(400.0f, 400.0f, 400.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+			//CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(400.0f, 400.0f, 400.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+			CVK::Light *plight = new CVK::Light(glm::vec4(i, j, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 			CVK::State::getInstance()->addLight(plight);
 		}
-	}*/
-	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
-	plight->setType(0);
-	plight->setCastShadow(true, window);
-	CVK::State::getInstance()->addLight(plight);
+	}
+	//CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
+	//plight->setType(0);
+	//plight->setCastShadow(true, window);
+	//CVK::State::getInstance()->addLight(plight);
 
 	//plight = new CVK::Light(glm::vec4(5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(30.0f, 30.0f, 30.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
 	//plight->setType(0);
 	//plight->setCastShadow(true, window);
 	//CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
-	plight->setType(1);
-	plight->setCastShadow(true, window);
-	CVK::State::getInstance()->addLight(plight);
+	//plight = new CVK::Light(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	//plight->setType(1);
+	//plight->setCastShadow(true, window);
+	//CVK::State::getInstance()->addLight(plight);
 
 	CVK::State::getInstance()->updateSceneSettings(DARKGREY, FOG_LINEAR, WHITE, 1, 50, 1);
 }
@@ -103,11 +106,16 @@ void init_camera()
 
 void init_materials()
 {
-	pbr_mat_simple = new CVK::Material(RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_basecolor-boosted.png",
-									   RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_normal.png",
-		                               RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_metallic.png",
-		                               RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_roughness.png",
-		                               RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_ao.png");
+	pbr_mat_gold = new CVK::Material(RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_basecolor-boosted.png",
+									 RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_normal.png",
+		                             RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_metallic.png",
+		                             RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_roughness.png",
+		                             RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_ao.png");
+	pbr_mat_iron = new CVK::Material(RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_basecolor.png",
+									 RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_normal.png",
+									 RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_metallic.png",
+									 RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_roughness.png",
+									 RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_ao.png");
 	pbr_mat1 = new CVK::Material(RESOURCES_PATH "/textures/darkTiles/darktiles1_basecolor.png",
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_normal-OGL.png",
 								 RESOURCES_PATH "/textures/darkTiles/darktiles1_metallic.png",
@@ -138,7 +146,7 @@ void init_scene()
 	scene_node = new CVK::Node("Scene");
 	CVK::Node *sphere_node = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
 	sphere_node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.2f, 0.2f)));
-	sphere_node->setMaterial(pbr_mat_simple);
+	sphere_node->setMaterial(pbr_mat_gold);
 	scene_node->addChild(sphere_node);
 
 	/****************************
@@ -189,6 +197,25 @@ void init_scene()
 	shaderPresenter->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(0.25f, 0.25f, 0.25f)));
 	shaderPresenter->setMaterial(pbr_mat3);
 	scene_node4->addChild(shaderPresenter);
+
+	/****************************
+	* Scene 5 - Pre Rendertest
+	*****************************/
+	scene_node5 = new CVK::Node("Scene");
+	CVK::Node *sphere_gold = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	glm::mat4 mm1 = glm::translate(glm::mat4(1.0f), glm::vec3(10.0f, 0.0f, 0.0f));
+	mm1 = glm::scale(mm1, glm::vec3(0.5f, 0.5f, 0.5f));
+	sphere_gold->setModelMatrix(mm1);
+	sphere_gold->setMaterial(pbr_mat_gold);
+	scene_node5->addChild(sphere_gold);
+
+	CVK::Node *sphere_iron = new CVK::Node(std::string("Sphere"), std::string(RESOURCES_PATH "/meshes/sphere.obj"), false);
+	glm::mat4 mm2 = glm::translate(glm::mat4(1.0f), glm::vec3(-10.0f, 0.0f, 0.0f));
+	mm2 = glm::scale(mm2, glm::vec3(0.5f, 0.5f, 0.5f));
+	sphere_iron->setModelMatrix(mm2);
+	sphere_iron->setMaterial(pbr_mat_iron);
+	scene_node5->addChild(sphere_iron);
+
 }
 
 void clean_up()
@@ -236,7 +263,7 @@ void draw_gui()
 	ImGui::End();
 }
 
-void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader)
+void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader, CVK::ShaderCubeMap *skybox = nullptr , CVK::Camera * cam = cam_trackball ,unsigned int width = windowWidth, unsigned int height = windowHeight)
 {
 	// 1st pass: render shadow maps
 	CVK::Light *light = nullptr;
@@ -261,14 +288,20 @@ void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader)
 	}
 
 	// 2nd pass: render scene normally
-	glViewport(0, 0, windowWidth, windowHeight);
+	glViewport(0, 0, width, height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	CVK::State::getInstance()->setCamera(cam_trackball);
+	CVK::State::getInstance()->setCamera(cam);
 
 	CVK::State::getInstance()->setShader(shader);
 	shader->update();
 	scene->render();
+
+	if (skybox != nullptr)
+	{
+		skybox->update();
+		skybox->render();
+	}
 }
 
 int main()
@@ -323,15 +356,19 @@ int main()
 	const char *shadernames2[2] = { SHADERS_PATH "/PBR/PBR.vert", SHADERS_PATH "/PBR/PBR.frag" };
 	CVK::ShaderPBR pbrShader(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, shadernames2, environment);
 
-	//CVK::State::getInstance()->setShader(&pbrShaderSimple);
-	CVK::State::getInstance()->setShader(&pbrShader);
-
-
 	init_lights();
 	init_camera();
 	init_materials();
 	init_scene();
 	init_imgui();
+
+	environment->renderSceneToEnvironmentMap(render_scene,*scene_node5, pbrShader, skyBoxShader, 1024, glm::vec3(0.0, 0.0, 0.0));
+	environment->computeMaps();
+
+	CVK::ShaderCubeMap skyBoxShader2(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, skyBoxShadernames, environment->getEnvironmentMap());
+
+	//CVK::State::getInstance()->setShader(&pbrShaderSimple);
+	CVK::State::getInstance()->setShader(&pbrShader);
 
 	double time = glfwGetTime();
 	while (!glfwWindowShouldClose(window))
@@ -390,9 +427,9 @@ int main()
 		}
 
 		// Use Shader and define camera uniforms
-		pbr_mat_simple->setMetallic(metallic);
-		pbr_mat_simple->setRoughness(roughness);
-		pbr_mat_simple->setAO(ao);
+		pbr_mat_gold->setMetallic(metallic);
+		pbr_mat_gold->setRoughness(roughness);
+		pbr_mat_gold->setAO(ao);
 
 		if (activeScene < 0 || activeScene > 3)
 			activeScene = 0;
@@ -403,17 +440,11 @@ int main()
 		{
 		case 0:
 			pbrShader.setDisplayMode(displayMode);
-			render_scene(scene_node, &pbrShader);
-
-			skyBoxShader.update();
-			skyBoxShader.render();
+			render_scene(scene_node, &pbrShader, &skyBoxShader2);
 			break;
 		case 1:
 			pbrShader.setDisplayMode(displayMode);
-			render_scene(scene_node2, &pbrShader);
-
-			skyBoxShader.update();
-			skyBoxShader.render();
+			render_scene(scene_node2, &pbrShader, &skyBoxShader2);
 			break;
 		case 2:
 			pbrShader.setDisplayMode(displayMode);
@@ -421,7 +452,7 @@ int main()
 			break;
 		case 3:
 			pbrShader.setDisplayMode(displayMode);
-			render_scene(scene_node4, &pbrShader);
+			render_scene(scene_node4, &pbrShader, &skyBoxShader2);
 			break;
 		default:
 			render_scene(scene_node, &pbrShader);
