@@ -126,8 +126,8 @@ private:
 	bool m_castShadow = false;
 	int m_lightType;	//!< 0 = directional, 1 = point
 
-	int m_shadowWidth = 1024;
-	int m_shadowHeight = 1024;
+	int m_shadowWidth = 2048;
+	int m_shadowHeight = 2048;
 };
 
 }

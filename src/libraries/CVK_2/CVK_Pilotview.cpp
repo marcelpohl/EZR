@@ -81,12 +81,12 @@ void CVK::Pilotview::update(double deltaTime)
 	}
 
 	if (glfwGetKey(m_window, GLFW_KEY_UP) == GLFW_PRESS)
-		m_speed += (float)deltaTime;
+		m_speed += (float)deltaTime * 4;
 	else if (glfwGetKey(m_window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		m_speed -= (float)deltaTime;
+		m_speed -= (float)deltaTime * 4;
 	else
 		m_speed = (m_speed > 0) ?
-			m_speed - 5.0f * (float)deltaTime : m_speed + 5.0f * (float)deltaTime;
+			m_speed - 5.0f * (float)deltaTime * 4 : m_speed + 5.0f * (float)deltaTime * 4;
 
 	m_cameraPos += m_speed * m_direction * (float)deltaTime;
 	m_viewmatrix = glm::lookAt( m_cameraPos, m_cameraPos + m_direction, m_up);  
