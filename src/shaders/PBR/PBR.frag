@@ -253,7 +253,7 @@ void main()
         vec3 lightVec = normalize(light.position - geo_Attributes.pos);
         vec3 halfVec  = normalize(viewVec + lightVec);
         float distance = length(light.position - geo_Attributes.pos);
-        float attenuation = 1.0 / distance;// (distance * distance); 	// TODO tweak looks
+        float attenuation = 1.0 / (distance * distance); //distance; 	// TODO tweak looks
         vec3 radiance = light.color * attenuation;
 
         // Cook-Torrance BRDF

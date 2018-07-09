@@ -26,8 +26,16 @@ CVK::Material *pbr_mat_ceiling = nullptr;
 CVK::Material *pbr_mat_wall = nullptr;
 CVK::Material *pbr_mat_wallBig = nullptr;
 CVK::Material *pbr_mat_pillarGate = nullptr;
+CVK::Material *pbr_mat_separator = nullptr;
+CVK::Material *pbr_mat_wallUpper = nullptr;
+CVK::Material *pbr_mat_midAperature = nullptr;
+CVK::Material *pbr_mat_sideAperature = nullptr;
 
 CVK::Material *pbr_mat_cerberus = nullptr;
+CVK::Material *pbr_mat_box = nullptr;
+CVK::Material *pbr_mat_sphere = nullptr;
+CVK::Material *pbr_mat_marble = nullptr;
+CVK::Material *pbr_mat_chest = nullptr;
 
 // global shaders
 CVK::ShaderMinimal *depthMapShader;
@@ -69,55 +77,55 @@ void init_lights()
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}*/
-	//CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
-	//plight->setType(0);
-	//plight->setCastShadow(true, window);
-	//CVK::State::getInstance()->addLight(plight);
+	/*plight = new CVK::Light(glm::vec4(0.1f, 10.0f, 0.1f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(20.0f));
+	plight->setType(0);
+	plight->setCastShadow(true, window);
+	CVK::State::getInstance()->addLight(plight);*/
 
 	// mid aperture light
-	plight = new CVK::Light(glm::vec4(0.0f, 20.0f, 0.0f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight = new CVK::Light(glm::vec4(0.0f, 20.0f, 0.0f, 1.0f), glm::vec3(1000.0f, 1000.0f, 1000.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 	plight->setType(1);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
 	// side aperture lights
-	plight = new CVK::Light(glm::vec4(43.0f, 24.2f, 28.5f, 1.0f), glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight = new CVK::Light(glm::vec4(43.0f, 23.2f, 28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 	plight->setType(1);
 	plight->setCastShadow(false, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(43.0f, 24.2f, -28.5f, 1.0f), glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight = new CVK::Light(glm::vec4(43.0f, 23.2f, -28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 	plight->setType(1);
 	plight->setCastShadow(false, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(-43.0f, 24.2f, 28.5f, 1.0f), glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight = new CVK::Light(glm::vec4(-43.0f, 23.2f, 28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 	plight->setType(1);
 	plight->setCastShadow(false, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(-43.0f, 24.2f, -28.5f, 1.0f), glm::vec3(5.0f, 5.0f, 5.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
+	plight = new CVK::Light(glm::vec4(-43.0f, 23.2f, -28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.0f);
 	plight->setType(1);
 	plight->setCastShadow(false, window);
 	CVK::State::getInstance()->addLight(plight);
 
 
-	plight = new CVK::Light(glm::vec4(43.0f, 24.2f, 28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(43.0f, 0.0f, 28.5f), 1.0f, glm::radians(15.0f));
+	plight = new CVK::Light(glm::vec4(43.0f, 23.2f, 28.5f, 1.0f), glm::vec3(750.0f, 750.0f, 750.0f), glm::vec3(43.0f, 20.0f, 28.4f), 1.0f, glm::radians(18.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(43.0f, 24.2f, -28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(43.0f, 0.0f, -28.5f), 1.0f, glm::radians(15.0f));
+	plight = new CVK::Light(glm::vec4(43.0f, 23.2f, -28.5f, 1.0f), glm::vec3(750.0f, 750.0f, 750.0f), glm::vec3(43.0f, 20.0f, -28.4f), 1.0f, glm::radians(18.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(-43.0f, 24.2f, 28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(-43.0f, 0.0f, 28.5f), 1.0f, glm::radians(15.0f));
+	plight = new CVK::Light(glm::vec4(-43.0f, 23.2f, 28.5f, 1.0f), glm::vec3(750.0f, 750.0f, 750.0f), glm::vec3(-43.0f, 20.0f, 28.4f), 1.0f, glm::radians(18.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
 
-	plight = new CVK::Light(glm::vec4(-43.0f, 24.2f, -28.5f, 1.0f), glm::vec3(100.0f, 100.0f, 100.0f), glm::vec3(-43.0f, 0.0f, -28.5f), 1.0f, glm::radians(15.0f));
+	plight = new CVK::Light(glm::vec4(-43.0f, 23.2f, -28.5f, 1.0f), glm::vec3(750.0f, 750.0f, 750.0f), glm::vec3(-43.0f, 20.0f, -28.4f), 1.0f, glm::radians(18.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
@@ -166,12 +174,52 @@ void init_materials()
 									       RESOURCES_PATH "/textures/Scene/PillarGate_Metallic.png",
 									       RESOURCES_PATH "/textures/Scene/PillarGate_Roughness.png",
 									       RESOURCES_PATH "/textures/Scene/PillarGate_AmbientOcclusion.png");
+	pbr_mat_separator = new CVK::Material(RESOURCES_PATH "/textures/Scene/separator_BaseColor.png",
+										  RESOURCES_PATH "/textures/Scene/separator_Normal.png",
+										  RESOURCES_PATH "/textures/Scene/separator_Metallic.png",
+										  RESOURCES_PATH "/textures/Scene/separator_Roughness.png",
+										  RESOURCES_PATH "/textures/Scene/separator_AmbientOcclusion.png");
+	pbr_mat_wallUpper = new CVK::Material(RESOURCES_PATH "/textures/Scene/wallUpper_BaseColor.png",
+										  RESOURCES_PATH "/textures/Scene/wallUpper_Normal.png",
+										  RESOURCES_PATH "/textures/Scene/wallUpper_Metallic.png",
+										  RESOURCES_PATH "/textures/Scene/wallUpper_Roughness.png",
+										  RESOURCES_PATH "/textures/Scene/wallUpper_AmbientOcclusion.png");
+	pbr_mat_midAperature = new CVK::Material(RESOURCES_PATH "/textures/Scene/midAperature_BaseColor.png",
+		RESOURCES_PATH "/textures/Scene/midAperature_Normal.png",
+		RESOURCES_PATH "/textures/Scene/midAperature_Metallic.png",
+		RESOURCES_PATH "/textures/Scene/midAperature_Roughness.png",
+		RESOURCES_PATH "/textures/Scene/midAperature_AmbientOcclusion.png");
+	pbr_mat_sideAperature = new CVK::Material(RESOURCES_PATH "/textures/Scene/sideAperature_BaseColor.png",
+		RESOURCES_PATH "/textures/Scene/sideAperature_Normal.png",
+		RESOURCES_PATH "/textures/Scene/sideAperature_Metallic.png",
+		RESOURCES_PATH "/textures/Scene/sideAperature_Roughness.png",
+		RESOURCES_PATH "/textures/Scene/sideAperature_AmbientOcclusion.png");
 
 	pbr_mat_cerberus = new CVK::Material(RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_BaseColor.png",
 		RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_Normals.png",
 		RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_Metal.png",
 		RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_Roughness.png",
 		RESOURCES_PATH "/textures/Scene/ceiling_ao.png");
+	pbr_mat_box = new CVK::Material(RESOURCES_PATH "/textures/Scene/box_BaseColor.png",
+		RESOURCES_PATH "/textures/Scene/box_Normal.png",
+		RESOURCES_PATH "/textures/Scene/box_Metallic.png",
+		RESOURCES_PATH "/textures/Scene/box_Roughness.png",
+		RESOURCES_PATH "/textures/Scene/box_AmbientOcclusion.png");
+	pbr_mat_sphere = new CVK::Material(RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_basecolor-boosted.png",
+		RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_normal.png",
+		RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_metallic.png",
+		RESOURCES_PATH "/textures/ironScuffed/Iron-Scuffed_roughness.png",
+		RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_ao.png");
+	pbr_mat_chest = new CVK::Material(RESOURCES_PATH "/textures/Chest/Chest_Base_Color.png",
+		RESOURCES_PATH "/textures/Chest/Chest_Normal_OpenGL.png",
+		RESOURCES_PATH "/textures/Chest/Chest_Metallic.png",
+		RESOURCES_PATH "/textures/Chest/Chest_Roughness.png",
+		RESOURCES_PATH "/textures/Chest/Chest_Mixed_AO.png");
+	pbr_mat_marble = new CVK::Material(RESOURCES_PATH "/textures/Scene/marble-speckled-albedo.png",
+		RESOURCES_PATH "/textures/Scene/marble-speckled-normal.png",
+		RESOURCES_PATH "/textures/Scene/marble-speckled-metalness.png",
+		RESOURCES_PATH "/textures/Scene/marble-speckled-roughness.png",
+		RESOURCES_PATH "/textures/goldScuffed/gold-scuffed_ao.png");
 }
 
 void init_scene()
@@ -199,7 +247,7 @@ void init_scene()
 
 	node = new CVK::Node(std::string("separators"), std::string(RESOURCES_PATH "/meshes/Scene/separators.obj"), false);
 	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
-	node->setMaterial(pbr_mat_general);
+	node->setMaterial(pbr_mat_separator);
 	scene_node_room->addChild(node);
 
 	node = new CVK::Node(std::string("wallBig"), std::string(RESOURCES_PATH "/meshes/Scene/wallBig.obj"), false);
@@ -214,7 +262,7 @@ void init_scene()
 
 	node = new CVK::Node(std::string("wallsUpper"), std::string(RESOURCES_PATH "/meshes/Scene/wallsUpper.obj"), false);
 	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
-	node->setMaterial(pbr_mat_general);
+	node->setMaterial(pbr_mat_wallUpper);
 	scene_node_room->addChild(node);
 
 
@@ -224,14 +272,23 @@ void init_scene()
 	scene_node_static_obj = new CVK::Node("Static Objects");
 	node = new CVK::Node(std::string("MidAperature"), std::string(RESOURCES_PATH "/meshes/Scene/midAperature.obj"), false);
 	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
-	node->setMaterial(pbr_mat_general);
-	scene_node_static_obj->addChild(node);
+	node->setMaterial(pbr_mat_midAperature);
+	//scene_node_static_obj->addChild(node);
+	scene_node_room->addChild(node);
 	scene_shadows->addChild(node);
 
 	node = new CVK::Node(std::string("SideAperatures"), std::string(RESOURCES_PATH "/meshes/Scene/sideAparetures.obj"), false);
 	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
-	node->setMaterial(pbr_mat_general);
-	scene_node_static_obj->addChild(node);
+	node->setMaterial(pbr_mat_sideAperature);
+	//scene_node_static_obj->addChild(node);
+	scene_node_room->addChild(node);
+	scene_shadows->addChild(node);
+
+	node = new CVK::Node(std::string("SideAperatures"), std::string(RESOURCES_PATH "/meshes/Scene/sphere.obj"), false);
+	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+	node->setMaterial(pbr_mat_sphere);
+	//scene_node_static_obj->addChild(node);
+	scene_node_room->addChild(node);
 	scene_shadows->addChild(node);
 
 
@@ -241,13 +298,32 @@ void init_scene()
 	scene_node_dyn_mid = new CVK::Node("Dynamic mid aperature");
 	node = new CVK::Node(std::string("Dynamic midAperature"), std::string(RESOURCES_PATH "/meshes/Scene/midAperature_moving.obj"), false);
 	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
-	node->setMaterial(pbr_mat_general);
+	node->setMaterial(pbr_mat_midAperature);
 	scene_node_dyn_mid->addChild(node);
 	scene_shadows->addChild(node);
 
 	node = new CVK::Node(std::string("Cerberus Gun"), std::string(RESOURCES_PATH "/meshes/Scene/cerberus.obj"), false);
 	node->setModelMatrix(glm::translate(*node->getModelMatrix(), glm::vec3(0.0f, 1.5f, 0.0f)));
 	node->setMaterial(pbr_mat_cerberus);
+	scene_node_dyn_mid->addChild(node);
+	scene_shadows->addChild(node);
+
+	node = new CVK::Node(std::string("Box"), std::string(RESOURCES_PATH "/meshes/Scene/box.obj"), false);
+	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+	node->setMaterial(pbr_mat_box);
+	scene_node_dyn_mid->addChild(node);
+	scene_shadows->addChild(node);
+
+	node = new CVK::Node(std::string("Chest"), std::string(RESOURCES_PATH "/meshes/chest.obj"), false);
+	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(2.0f, 2.0f, 2.0f)));
+	node->setMaterial(pbr_mat_chest);
+	scene_node_dyn_mid->addChild(node);
+	scene_shadows->addChild(node);
+
+
+	node = new CVK::Node(std::string("Marble"), std::string(RESOURCES_PATH "/meshes/Scene/sphere_marble.obj"), false);
+	node->setModelMatrix(glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, 1.0f, 1.0f)));
+	node->setMaterial(pbr_mat_marble);
 	scene_node_dyn_mid->addChild(node);
 	scene_shadows->addChild(node);
 
@@ -266,31 +342,8 @@ void clean_up()
 	delete cam_pilot;
 }
 
-
-void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader, CVK::ShaderCubeMap *skybox = nullptr, CVK::Camera * cam = cam_pilot, unsigned int width = windowWidth, unsigned int height = windowHeight)
+void render_scene_cube(CVK::Node *scene, CVK::ShaderMinimal *shader, CVK::ShaderCubeMap *skybox = nullptr, CVK::Camera * cam = cam_pilot, unsigned int width = windowWidth, unsigned int height = windowHeight)
 {
-	// 1st pass: render shadow maps
-	CVK::Light *light = nullptr;
-	for (size_t i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
-		light = &CVK::State::getInstance()->getLights()->at(i);
-		if (light->prepareRenderShadowMap())
-		{
-			CVK::State::getInstance()->setCamera(light->getLightCamera());
-			if (light->getType() == 0) {
-				CVK::State::getInstance()->setShader(depthMapShader);
-				depthMapShader->update();
-			}
-			else {
-				CVK::State::getInstance()->setShader(shadowCubemapShader);
-				shadowCubemapShader->update(light);
-			}
-			
-			scene->render();
-
-			light->finishRenderShadowMap();
-		}
-	}
-
 	// 2nd pass: render scene normally
 	glViewport(0, 0, width, height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -307,6 +360,45 @@ void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader, CVK::ShaderCubeM
 		skybox->render();
 	}
 
+}
+
+
+void render_scene(CVK::Node *scene, CVK::ShaderMinimal *shader, CVK::ShaderCubeMap *skybox = nullptr)
+{
+	// 1st pass: render shadow maps
+	CVK::Light *light = nullptr;
+	for (size_t i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
+		light = &CVK::State::getInstance()->getLights()->at(i);
+		if (light->prepareRenderShadowMap())
+		{
+			CVK::State::getInstance()->setCamera(light->getLightCamera());
+			if (light->getType() == 0) {
+				CVK::State::getInstance()->setShader(depthMapShader);
+				depthMapShader->update();
+			}
+			else {
+				CVK::State::getInstance()->setShader(shadowCubemapShader);
+				shadowCubemapShader->update(light);
+			}
+
+			scene_shadows->render();
+
+			light->finishRenderShadowMap();
+		}
+	}
+
+	// 2nd pass: render scene normally
+	glViewport(0, 0, windowWidth, windowHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	CVK::State::getInstance()->setCamera(cam_pilot);
+
+	CVK::State::getInstance()->setShader(shader);
+	shader->update();
+	scene->render();
+
+	skybox->update();
+	skybox->render();
 }
 
 int main()
@@ -329,18 +421,18 @@ int main()
 
 
 	std::vector<std::string> cubeMapImages;
-	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posx.jpg"));
-	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negx.jpg"));
-	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posy.jpg"));
-	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negy.jpg"));
-	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posz.jpg"));
-	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negz.jpg"));
-	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/grey.png"));
-	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/grey.png"));
-	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/grey.png"));
-	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/grey.png"));
-	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/grey.png"));
-	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/grey.png"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posx.jpg"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negx.jpg"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posy.jpg"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negy.jpg"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/posz.jpg"));
+	//cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/StPeter/negz.jpg"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/scene.png"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/scene.png"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/scene.png"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/scene.png"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/scene.png"));
+	cubeMapImages.push_back(std::string(RESOURCES_PATH "/textures/TestCube/scene.png"));
 
 	CVK::CubeMapTexture* cubeMap = new CVK::CubeMapTexture(cubeMapImages);
 	CVK::Environment* environment = new CVK::Environment(cubeMap, 32u, 512u, 5u, 1024u);
@@ -366,7 +458,7 @@ int main()
 	init_materials();
 	init_scene();
 
-	environment->renderSceneToEnvironmentMap(render_scene, *scene_node_room, pbrShader, skyBoxShader, 1024, glm::vec3(0.0f, 0.0f, 0.0f));
+	environment->renderSceneToEnvironmentMap(render_scene_cube, *scene_node_room, pbrShader, skyBoxShader, 1024, glm::vec3(0.0f, 10.0f, 0.0f));
 	environment->computeMaps();
 
 	CVK::ShaderCubeMap skyBoxShader2(VERTEX_SHADER_BIT | FRAGMENT_SHADER_BIT, skyBoxShadernames, environment->getEnvironmentMap());
@@ -404,6 +496,42 @@ int main()
 					glm::translate(
 						glm::rotate(*(*nodes)[i]->getModelMatrix(), glm::radians(-20.0f * (float)deltaTime), glm::vec3(0.0f, 1.0f, 0.0f)),
 						glm::vec3(0.0f, glm::sin(time) / 64.0f, 0.0f))
+				);
+			if (*(*nodes)[i]->getName() == "Box")
+				(*nodes)[i]->setModelMatrix(
+					glm::rotate(
+						glm::translate(
+							glm::mat4(1.0f), 
+							glm::vec3(43.0f, glm::sin(time) / 2.0f, 28.5f)
+						),
+						glm::radians(-20.0f * (float)time), 
+						glm::vec3(0.0f, 1.0f, 0.0f)
+					)
+				);
+			if (*(*nodes)[i]->getName() == "Chest")
+				(*nodes)[i]->setModelMatrix(
+					glm::scale(
+						glm::rotate(
+							glm::translate(
+								glm::mat4(1.0f),
+								glm::vec3(-43.0f, glm::sin(time) / 2.0f + 6.0f, -29.0f)
+							),
+							glm::radians(-20.0f * (float)time),
+							glm::vec3(0.0f, 1.0f, 0.0f)
+						),
+						glm::vec3(2.0f, 2.0f, 2.0f)
+					)
+				);
+			if (*(*nodes)[i]->getName() == "Marble")
+				(*nodes)[i]->setModelMatrix(
+					glm::rotate(
+						glm::translate(
+							glm::mat4(1.0f),
+							glm::vec3(-43.0f, glm::sin(time) / 2.0f, 29.0f)
+						),
+						glm::radians(-20.0f * (float)time),
+						glm::vec3(0.0f, 1.0f, 0.0f)
+					)
 				);
 		}
 

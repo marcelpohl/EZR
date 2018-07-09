@@ -72,7 +72,7 @@ void init_lights()
 			CVK::State::getInstance()->addLight(plight);
 		}
 	}*/
-	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(50.0f, 50.0f, 50.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
+	CVK::Light *plight = new CVK::Light(glm::vec4(-5.0f, 5.0f, 10.0f, 1.0f), glm::vec3(500.0f, 500.0f, 500.0f), glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, glm::radians(15.0f));
 	plight->setType(0);
 	plight->setCastShadow(true, window);
 	CVK::State::getInstance()->addLight(plight);
@@ -350,7 +350,7 @@ int main()
 		CVK::Light *light = nullptr;
 		for (size_t i = 0; i < CVK::State::getInstance()->getLights()->size(); i++) {
 			light = &CVK::State::getInstance()->getLights()->at(i);
-			if (activeScene != 2) {
+			if (activeScene != 1) {
 				glm::vec4 lightPos = *(light->getPosition());
 				lightPos = glm::rotate(glm::mat4(1.0f), glm::radians(20.0f * (float)deltaTime), glm::vec3(0.0f, 1.0f, 0.0f)) * lightPos;
 				light->setPosition(lightPos);
@@ -361,14 +361,14 @@ int main()
 
 		// set active lights
 		if (activeScene != lastScene) {
-			if (activeScene == 2)
+			if (activeScene == 1)
 			{
 				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
 				//CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
-				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(20.0f, 15.0f, 15.0f));
+				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(100.0f, 75.0f, 75.0f));
 			}
 			else {
-				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(50.0f, 50.0f, 50.0f));
+				CVK::State::getInstance()->getLights()->at(0).setColor(glm::vec3(500.0f, 500.0f, 500.0f));
 				//CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(30.0f, 30.0f, 30.0f));
 				CVK::State::getInstance()->getLights()->at(1).setColor(glm::vec3(0.0f, 0.0f, 0.0f));
 			}
@@ -376,7 +376,7 @@ int main()
 		}
 
 		// rotate spheres in scene 2
-		if (activeScene == 2)
+		if (activeScene == 1)
 		{
 			std::vector<CVK::Node*> *nodes = scene_node3->getChildren();
 			for (int i = 0; i < nodes->size(); i++) {
@@ -403,21 +403,18 @@ int main()
 		{
 		case 0:
 			pbrShader.setDisplayMode(displayMode);
+			render_scene(scene_node2, &pbrShader);
+			break;
+		case 1:
+			pbrShader.setDisplayMode(displayMode);
+			render_scene(scene_node3, &pbrShader);
+			break;
+		case 2:
+			pbrShader.setDisplayMode(displayMode);
 			render_scene(scene_node, &pbrShader);
 
 			skyBoxShader.update();
 			skyBoxShader.render();
-			break;
-		case 1:
-			pbrShader.setDisplayMode(displayMode);
-			render_scene(scene_node2, &pbrShader);
-
-			skyBoxShader.update();
-			skyBoxShader.render();
-			break;
-		case 2:
-			pbrShader.setDisplayMode(displayMode);
-			render_scene(scene_node3, &pbrShader);
 			break;
 		case 3:
 			pbrShader.setDisplayMode(displayMode);

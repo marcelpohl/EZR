@@ -109,7 +109,7 @@ private:
 	GLuint m_skyboxVAO;
 	GLuint m_skyboxVBO;
 
-	glm::mat4 m_skyboxCaptureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);;
+	glm::mat4 m_skyboxCaptureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 500.0f);;
 	glm::mat4 m_skyboxCaptureViews[6] = // All Blickrichtungen
 	{
 		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3( 1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
