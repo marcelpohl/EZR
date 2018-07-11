@@ -31,7 +31,7 @@ CVK::Material *pbr_mat_wallUpper = nullptr;
 CVK::Material *pbr_mat_midAperature = nullptr;
 CVK::Material *pbr_mat_sideAperature = nullptr;
 
-CVK::Material *pbr_mat_cerberus = nullptr;
+CVK::Material *pbr_mat_matBall = nullptr;
 CVK::Material *pbr_mat_box = nullptr;
 CVK::Material *pbr_mat_sphere = nullptr;
 CVK::Material *pbr_mat_marble = nullptr;
@@ -195,11 +195,11 @@ void init_materials()
 		RESOURCES_PATH "/textures/Scene/sideAperature_Roughness.png",
 		RESOURCES_PATH "/textures/Scene/sideAperature_AmbientOcclusion.png");
 
-	pbr_mat_cerberus = new CVK::Material(RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_BaseColor.png",
-		RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_Normals.png",
-		RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_Metal.png",
-		RESOURCES_PATH "/textures/Scene/cerberus/Cerberus_Roughness.png",
-		RESOURCES_PATH "/textures/Scene/ceiling_ao.png");
+	pbr_mat_matBall = new CVK::Material(RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_color.png",
+		RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_nmap.png",
+		RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_metalness.png",
+		RESOURCES_PATH "/textures/matBall/export3dcoat_lambert3SG_rough.png",
+		RESOURCES_PATH "/textures/matBall/materialball_ao.png");
 	pbr_mat_box = new CVK::Material(RESOURCES_PATH "/textures/Scene/box_BaseColor.png",
 		RESOURCES_PATH "/textures/Scene/box_Normal.png",
 		RESOURCES_PATH "/textures/Scene/box_Metallic.png",
@@ -302,9 +302,9 @@ void init_scene()
 	scene_node_dyn_mid->addChild(node);
 	scene_shadows->addChild(node);
 
-	node = new CVK::Node(std::string("Cerberus Gun"), std::string(RESOURCES_PATH "/meshes/Scene/cerberus.obj"), false);
-	node->setModelMatrix(glm::translate(*node->getModelMatrix(), glm::vec3(0.0f, 1.5f, 0.0f)));
-	node->setMaterial(pbr_mat_cerberus);
+	node = new CVK::Node(std::string("Cerberus Gun"), std::string(RESOURCES_PATH "/meshes/export3dcoat.obj"), false);
+	node->setModelMatrix(glm::scale( glm::translate(*node->getModelMatrix(), glm::vec3(0.0f, 8.0f, 0.0f)), glm::vec3(0.5f, 0.5f, 0.5f)));
+	node->setMaterial(pbr_mat_matBall);
 	scene_node_dyn_mid->addChild(node);
 	scene_shadows->addChild(node);
 
